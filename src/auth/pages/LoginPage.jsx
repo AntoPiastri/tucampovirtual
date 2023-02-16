@@ -5,7 +5,7 @@ import { AuthLayout } from "../layout/AuthLayout"
 import { useForm } from "../../hooks"
 import { useDispatch, useSelector } from "react-redux"
 import { checkingAuth, cleanMessagge, newError } from "../../store/auth/thunks"
-import { selectErrorMessage, selectUser } from "../../store/auth"
+import { selectErrorMessage, selectSuccessMessage, selectUser } from "../../store/auth"
 import { useEffect, useState } from "react"
 
 export const LoginPage = () => {
@@ -15,7 +15,6 @@ export const LoginPage = () => {
     const {email, password, onInputChange} = useForm({
         email: "",
         password: ""
-
     })
 
 
@@ -45,8 +44,8 @@ export const LoginPage = () => {
     const user = useSelector(selectUser);
     useEffect(()=>{if(user){navigate("/establecimientos")}},[user])
 
-    
-    useEffect(()=>{if(errorMessage){setTimeout(function(){dispatch(cleanMessagge());}, 10000);}}, [errorMessage])
+    const successMessage = useSelector(selectSuccessMessage)
+    useEffect(() => { if (errorMessage || successMessage) { setTimeout(function () { dispatch(cleanMessagge()); }, 5000); } }, [errorMessage, successMessage])
     
 
 
@@ -83,6 +82,11 @@ export const LoginPage = () => {
                                 />
                         </Grid>
                     </Grid>
+                    <Grid container>
+                    <Grid item xs={12} sx={{ mt: 2 }} display={!!successMessage ? "" : "none"}>
+                        <Alert severity="success">{successMessage}</Alert>
+                    </Grid>
+                </Grid>
                     <Grid container>
                         <Grid item xs={12} sx={{mt:2}} display={!!errorMessage? "" : "none"}>
                             <Alert severity="error">{errorMessage}</Alert>

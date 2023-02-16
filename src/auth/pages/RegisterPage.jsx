@@ -12,10 +12,11 @@ import { useState } from "react"
 
 export const RegisterPage = () => {
 
-    const { name, email, password, onInputChange } = useForm({
+    const { name, email, password, confirmPassword, onInputChange } = useForm({
         name: "",
         email: "",
-        password: ""
+        password: "",
+        confirmPassword: ""
 
     })
     const dispatch = useDispatch();
@@ -37,6 +38,10 @@ export const RegisterPage = () => {
         {
             dispatch(newError("La contraseña debe tener al menos 8 caracteres"))
         }
+        else if (password != confirmPassword)
+        {
+            dispatch(newError("Las contraseñas no coinciden"))
+        }
         else 
         {
             dispatch(registroUsuario(name, email, password))
@@ -48,19 +53,7 @@ export const RegisterPage = () => {
     const user = useSelector(selectUser);
     useEffect(() => { if (user) { navigate("/establecimientos") } }, [user])
 
-    const [showCreateButton, setshowCreateButton] = useState(false)
-    const [confirmPassword, setConfirmPassword] = useState("")
-    const errorPasswords = (event) => {
-        setConfirmPassword(event.target.value)
-        if (password != event.target.value) {
-            console.log("Las contraseñas no coinciden")
-            setshowCreateButton(true)
-        }
-        else {
-            setshowCreateButton(false)
-        }
-       
-    }
+    
     return (
         <AuthLayout title="Crea tu cuenta">
             <form onSubmit={onSubmit}>
@@ -97,7 +90,7 @@ export const RegisterPage = () => {
                             name="confirmPassword"
                             color="firstPageButton"
                             value={confirmPassword}
-                            onChange={errorPasswords} />
+                            onChange={onInputChange} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -107,7 +100,7 @@ export const RegisterPage = () => {
                 </Grid>
                 <Grid container spacing={2} sx={{ mb: 2, mt: 1 }}>
                     <Grid item xs={12}>
-                        <Button type="submit" variant="contained" fullWidth color="firstPageButton" disabled={showCreateButton}> 
+                        <Button type="submit" variant="contained" fullWidth color="firstPageButton"> 
                             Crear cuenta
                         </Button>
                      

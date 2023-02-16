@@ -11,6 +11,7 @@ export const getAllEstablecimientos = axios.create({
 })
 
 
-export const generalApi = axios.create({
-    baseURL: "https://backend-software-ganadero.azurewebsites.net/api/v1/system/signUp"
+export const generalSystemApi = axios.create({
+    baseURL: "https://backend-software-ganadero.azurewebsites.net/api/v1/system/"
 })
+ 

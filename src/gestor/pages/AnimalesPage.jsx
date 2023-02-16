@@ -104,7 +104,7 @@ export const AnimalesPage = () => {
 
 
     const loadComponent = useSelector(selectLoadComponent)
-    useEffect(()=>{setOpen(false);}, [loadComponent])
+    
     return (
       <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" sx={{ minHeight: "100vh", backgroundImage: `url("http://demos.alan.sh/files/images/ujkoW.jpg")`, backgroundSize: "cover", backgroundPosition: "10% 52%", padding: 4 }}>
         <GestorLayout></GestorLayout>

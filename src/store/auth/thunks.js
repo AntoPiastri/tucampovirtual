@@ -1,17 +1,14 @@
-import { generalApi, getAllEstablecimientos, loginApi } from "../../apis";
+import { generalSystemApi, getAllEstablecimientos, loginApi } from "../../apis";
 import { errorMessage, establecimiento, establecimientos, loadComponent, login, logout, successMessage } from "./authSlide"
+
 
 
 
 export const registroUsuario = (name, email, password) => {
     return async (dispatch) => {
-
-
-
         try {
-            const resp = await generalApi.post("https://backend-software-ganadero.azurewebsites.net/api/v1/system/signUp", { name, email, password });
+            const resp = await generalSystemApi.post("https://backend-software-ganadero.azurewebsites.net/api/v1/system/signUp", { name, email, password });
             if (resp.status == 201) {
-                console.log(resp)
                 dispatch(checkingAuth(email, password))
             }
 
@@ -47,6 +44,96 @@ export const checkingAuth = (email, password) => {
             else if (error.response.status=="404")
             {
                 errorMessageText = "El usuario no posee una contraseña"
+            }
+            else if (error.response.status=="500")
+            {
+                errorMessageText = "Error interno en el servidor"
+            }
+            else
+            {
+                errorMessageText = error.response.data.message
+            }
+            dispatch(errorMessage(errorMessageText))
+
+        }
+    }
+
+}
+
+export const sendCodeRecoveryPassword = (email) => {
+    return async (dispatch) => {
+        const passwordChangeRequestToken ="4ab6bac4a19d71cbda199912f94ae348d7f6c0b0eb1c9271699488644519e8b68007ce33883629aa5c57229be32b0755ac734e4b0cdf71adab6ae3b6f9fff338"
+        try {
+            const resp = await generalSystemApi.post("requestPasswordChange", { email, passwordChangeRequestToken });
+            if (resp.status == 200)
+            {
+                dispatch(loadComponent("Success validate mail"))
+            }  
+        }
+        catch (error) {
+            if (error.response.status=="500")
+            {
+                errorMessageText = "Error interno en el servidor"
+            }
+            else
+            {
+                errorMessageText = error.response.data.message
+            }
+            dispatch(errorMessage(errorMessageText))
+        }
+    }
+
+}
+export const validateCodeRecoveryPassword = (email,userOTPCode) => {
+    return async (dispatch) => {
+        const otpCodeValidationToken ="d6a363353c1265d07394fce40b840d275f266a29ace2adc8c40a31d78b274e2511363c5445550072d5000bc9bc457b206b9cc23b4e0dde103e7c60eee091f583"
+        try {
+            const resp = await generalSystemApi.post("validateOTPCode", { email, otpCodeValidationToken, userOTPCode });
+            if (resp.status == 200)
+            {
+                dispatch(loadComponent("Success validate code"))
+            }
+        }
+        catch (error) {
+            let errorMessageText = "";
+            if(error.response.status=="401")
+            {
+                errorMessageText = "El código ingresado no es válido."
+            }
+            else if (error.response.status=="403" && error.response.data.message=="OTP Code provided is expired")
+            {
+                errorMessageText = "El código fue solicitado hace más de 24hs. Solicita un nuevo código"
+            }
+            else if (error.response.status=="500")
+            {
+                errorMessageText = "Error interno en el servidor"
+            }
+            else
+            {
+                errorMessageText = error.response.data.message
+            }
+            dispatch(errorMessage(errorMessageText))
+
+        }
+    }
+
+}
+export const recoveryPassword = (email,userOTPCode, newPassword) => {
+    return async (dispatch) => {
+        const passwordChangeToken ="a401f500e31be2dbdac6c6581f8a419f11c96ef2a512c324a1aab9b1e9774c9b60d794b7e0e8cf5de0f50b53273996b7dd7b66502eab49ded3e7d9d6248641bc"
+        try {
+            const resp = await generalSystemApi.post("passwordChange", { email, passwordChangeToken, userOTPCode, newPassword });
+            if (resp.status == 200)
+            {
+                dispatch(successMessage("Tu contraseña ha sido actualizada con éxito. Inicia sesión con ella."))
+                dispatch(loadComponent("Success password change"))
+            }
+        }
+        catch (error) {
+            let errorMessageText = "";
+            if (error.response.status=="400" && error.response.data.message=="New password could not be same as old password")
+            {
+                errorMessageText = "La nueva contraseña no puede ser igual a la contraseña anterior"
             }
             else if (error.response.status=="500")
             {
@@ -316,6 +403,7 @@ export const startServices = () => {
 }
 
 
+//Procedimientos asincronicos auxiliares
 export const newError = (error) => {
     return async (dispatch) => {
         dispatch(errorMessage(error))
@@ -327,6 +415,13 @@ export const cleanMessagge = () => {
     return async (dispatch) => {
         dispatch(errorMessage(null))
         dispatch(successMessage(null))
+    }
+
+}
+
+export const cleanLoadComponent = () => {
+    return async (dispatch) => {
+        dispatch(loadComponent(null))
     }
 
 }
