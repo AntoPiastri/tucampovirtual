@@ -5,21 +5,16 @@ import {red} from "@mui/material/colors"
 export const firstTheme = createTheme ({
     palette:{
         primary : {
-            main : "#485228",
-            secondary : "#000000"
+            main : "#485228"
         },
         secondary : {
-            main: "#543884"
+            main: "#88795f"
         },
         error:{
             main: red.A400
         },
-        mainPageButton : {
-            main : "#88795f"
-        },
-        firstPageButton : {
-            main : "#485228"
+        transparencias : {
+            main : "rgba(136, 121, 95, 0.4)"
         }
-        
     }
 })

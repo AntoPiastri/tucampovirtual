@@ -1,7 +1,7 @@
 import { Alert, Button, Grid, TextField, Typography } from "@mui/material"
 import { useForm } from "../../hooks"
 import { useDispatch, useSelector } from "react-redux"
-import { agregarEstablecimiento, cleanMessagge } from "../../store/auth/thunks"
+import { agregarEstablecimiento, cleanMessagge, newError } from "../../store/auth/thunks"
 import { selectErrorMessage, selectSuccessMessage, selectUser } from "../../store/auth"
 import { useEffect } from "react"
 import { GestorLayout } from "../layout/GestorLayout"
@@ -28,6 +28,7 @@ export const AgregarEstablecimientoPage = () => {
 
     const [camposDicose, setCamposDicose] = useState([]);
     const addCampo = () => {
+        setValoresDicosePropiedad([])
         if (cantidadDicosePropiedad == 1 || cantidadDicosePropiedad == 2 || cantidadDicosePropiedad == 3) {
             let aux = [];
             for (let i = 1; i <= parseInt(cantidadDicosePropiedad); i++) {
@@ -46,7 +47,38 @@ export const AgregarEstablecimientoPage = () => {
 
     const onSubmit = (event) => {
         event.preventDefault();
-        dispatch(agregarEstablecimiento(user.email, user.token, nombreEstablecimiento, nombreProductor, dicoseFisico, rubroPrincipal, cantidadDicosePropiedad, valoresDicosePropiedad))
+        if ( nombreEstablecimiento.length<4 ) 
+        {
+            
+            dispatch(newError("El nombre del establecimiento debe tener al menos 4 caracteres"))
+        }
+        else if ( nombreProductor.length<4 ) 
+        {
+            
+            dispatch(newError("El nombre del productor debe tener al menos 4 caracteres"))
+        }
+        else if ( dicoseFisico.length<1 ) 
+        {
+            
+            dispatch(newError("El dicose físico es un campo obligatorio"))
+        }
+        else if (rubroPrincipal.length<1)
+        {
+            dispatch(newError("Selecciona un rubro principal"))
+        }
+        else if (cantidadDicosePropiedad!="1"&&cantidadDicosePropiedad!="2"&&cantidadDicosePropiedad!="3")
+        {
+            dispatch(newError("Puedes ingresar hasta 3 dicoses distintos en un mismo establecimiento"))
+        }
+        else if (valoresDicosePropiedad.length!=cantidadDicosePropiedad)
+        {
+            dispatch(newError("Debes ingresar los números de dicoses faltantes"))
+        }
+        else 
+        {
+            dispatch(agregarEstablecimiento(user.email, user.token, nombreEstablecimiento, nombreProductor, dicoseFisico, rubroPrincipal, cantidadDicosePropiedad, valoresDicosePropiedad))
+        }
+        
 
     }
 
@@ -191,7 +223,7 @@ export const AgregarEstablecimientoPage = () => {
                         </Grid>
                         <Grid>
                             {camposDicose.map(campo =>
-                            (<Grid item xs={12} sx={{ mt: 2 }}>
+                            (<Grid item xs={12} sx={{ mt: 2 }} key={campo}>
                                 <TextField
                                     label={"Dicose " + campo}
                                     type="text"

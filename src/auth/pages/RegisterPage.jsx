@@ -61,7 +61,7 @@ export const RegisterPage = () => {
                     <Grid item xs={12} sx={{ mt: 2 }}>
                         <TextField label="Nombre completo" type="text" placeholder="Juan Perez" fullWidth
                             name="name"
-                            color="firstPageButton"
+                            color="primary"
                             value={name}
                             onChange={onInputChange} />
                     </Grid>
@@ -70,7 +70,7 @@ export const RegisterPage = () => {
                     <Grid item xs={12} sx={{ mt: 2 }}>
                         <TextField label="Correo" type="email" placeholder="Correo" fullWidth
                             name="email"
-                            color="firstPageButton"
+                            color="primary"
                             value={email}
                             onChange={onInputChange} />
                     </Grid>
@@ -79,7 +79,7 @@ export const RegisterPage = () => {
                     <Grid item xs={12} sx={{ mt: 2 }}>
                         <TextField label="Contraseña" type="password" placeholder="Contraseña" fullWidth
                             name="password"
-                            color="firstPageButton"
+                            color="primary"
                             value={password}
                             onChange={onInputChange} />
                     </Grid>
@@ -88,7 +88,7 @@ export const RegisterPage = () => {
                     <Grid item xs={12} sx={{ mt: 2 }}>
                         <TextField label="Repetir contraseña" type="password" placeholder="Repetir contraseña" fullWidth
                             name="confirmPassword"
-                            color="firstPageButton"
+                            color="primary"
                             value={confirmPassword}
                             onChange={onInputChange} />
                     </Grid>
@@ -100,7 +100,7 @@ export const RegisterPage = () => {
                 </Grid>
                 <Grid container spacing={2} sx={{ mb: 2, mt: 1 }}>
                     <Grid item xs={12}>
-                        <Button type="submit" variant="contained" fullWidth color="firstPageButton"> 
+                        <Button type="submit" variant="contained" fullWidth color="primary"> 
                             Crear cuenta
                         </Button>
                      

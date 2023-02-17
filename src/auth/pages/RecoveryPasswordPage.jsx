@@ -98,7 +98,7 @@ export const RecoveryPasswordPage = () => {
                         <TextField label="Ingresa tu mail" type="email" placeholder="juanperez@mail.com" fullWidth
                             disabled={!showComponentsController}
                             name="email"
-                            color="firstPageButton"
+                            color="primary"
                             value={email}
                             onChange={onInputChange} />
                     </Grid>
@@ -108,7 +108,7 @@ export const RecoveryPasswordPage = () => {
                         <TextField label="Ingresa el código" type="text" fullWidth
                             disabled={!showComponentsController2}
                             name="code"
-                            color="firstPageButton"
+                            color="primary"
                             value={code}
                             onChange={onInputChange} />
                     </Grid>
@@ -117,14 +117,14 @@ export const RecoveryPasswordPage = () => {
                     <Grid item xs={12} sx={{ mt: 2 }}>
                         <TextField label="Ingresa la nueva contraseña" type="password" fullWidth
                             name="newPassword"
-                            color="firstPageButton"
+                            color="primary"
                             value={newPassword}
                             onChange={onInputChange} />
                     </Grid>
                     <Grid item xs={12} sx={{ mt: 2 }}>
                         <TextField label="Repetir contraseña" type="password" fullWidth
                             name="verifyNewPassword"
-                            color="firstPageButton"
+                            color="primary"
                             value={verifyNewPassword}
                             onChange={onInputChange} />
                     </Grid>
@@ -137,7 +137,7 @@ export const RecoveryPasswordPage = () => {
                 </Grid>
                 <Grid container spacing={2} sx={{ mb: 2, mt: 1 }}>
                     <Grid item xs={12}>
-                        <Button type="submit" variant="contained" fullWidth color="firstPageButton">
+                        <Button type="submit" variant="contained" fullWidth color="primary">
                             {nameButton}
                         </Button>
                     </Grid>

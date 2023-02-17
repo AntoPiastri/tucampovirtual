@@ -57,7 +57,7 @@ export const LoginPage = () => {
                     <Grid container>
                         <Grid item xs={12} sx={{mt:2}}>
                             <TextField 
-                                color="firstPageButton"
+                                color="primary"
                                 label= "Correo" 
                                 type = "email" 
                                 placeholder="correo@google.com" 
@@ -71,7 +71,7 @@ export const LoginPage = () => {
                     <Grid container>
                         <Grid item xs={12} sx={{mt:2}}>
                             <TextField 
-                                color="firstPageButton"
+                                color="primary"
                                 label= "Contraseña" 
                                 type = "password" 
                                 placeholder="Contraseña" 
@@ -94,7 +94,7 @@ export const LoginPage = () => {
                     </Grid>
                     <Grid container spacing={2} sx= {{mb : 2, mt: 1}}>
                         <Grid item xs={12} sm={12}>
-                            <Button type="submit" variant="contained" fullWidth color="firstPageButton">
+                            <Button type="submit" variant="contained" fullWidth color="primary">
                                 Ingresar
                             </Button>
                         </Grid>

@@ -27,7 +27,7 @@ export const InicioPage = () => {
                     </section>
                 </Grid>
                 <Grid item>
-                    <Button variant="contained" fullWidth color="firstPageButton" onClick={Comenzar}>
+                    <Button variant="contained" fullWidth color="primary" onClick={Comenzar}>
                         COMENZAR
                     </Button>
                 </Grid>
