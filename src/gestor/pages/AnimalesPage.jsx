@@ -1,17 +1,32 @@
-import { FileUploadOutlined} from "@mui/icons-material"
-import { Grid, IconButton,Typography } from "@mui/material"
-import { DataGrid, esES,  GridToolbarContainer, GridToolbarExport, GridToolbarFilterButton} from "@mui/x-data-grid"
+import { FileUploadOutlined } from "@mui/icons-material"
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, IconButton, Typography } from "@mui/material"
+import { DataGrid, esES, GridToolbarContainer, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid"
 import { useState } from "react"
 import { useEffect, useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { selectEstablecimiento, selectLoadComponent, selectUser } from "../../store/auth"
+import { selectErrorMessage, selectEstablecimiento, selectLoadComponent, selectSuccessMessage, selectUser } from "../../store/auth"
 import { obtenerAnimales, sendFiletoBack } from "../../store/auth/thunks"
 import { GestorLayout } from "../layout/GestorLayout"
+import * as XLSX from "xlsx"
 
 
 
 export const AnimalesPage = () => {
   {
+
+    const [avise, setAvise] = useState({ "titulo": "Subiendo archivo", "contenido": "Espera mientras procesamos tus animales", "activeButton": true });
+    const errorMessage = useSelector(selectErrorMessage)
+    const successMessage = useSelector(selectSuccessMessage)
+    useEffect(() => { if (errorMessage || successMessage) { setAvise(successMessage) } }, [successMessage])
+    const [open, setOpen] = useState(false);
+    const handleClickOpen = () => {
+      setOpen(true);
+    };
+
+    const handleClose = () => {
+      setOpen(false);
+      setAvise({ "titulo": "Subiendo archivo", "contenido": "Espera mientras procesamos tus animales", "activeButton": true })
+    };
 
 
     const user = useSelector(selectUser);
@@ -48,9 +63,9 @@ export const AnimalesPage = () => {
     const fileInputRef = useRef();
     const onFileInputChange = ({ target }) => {
       if (target.files === 0) return;
-      
       console.log(target.files[0])
       dispatch(sendFiletoBack(user.email, user.token, target.files[0]))
+      handleClickOpen()
     };
 
     const columns = [
@@ -104,7 +119,7 @@ export const AnimalesPage = () => {
 
 
     const loadComponent = useSelector(selectLoadComponent)
-    
+
     return (
       <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" sx={{ minHeight: "100vh", backgroundImage: `url("http://demos.alan.sh/files/images/ujkoW.jpg")`, backgroundSize: "cover", backgroundPosition: "10% 52%", padding: 4 }}>
         <GestorLayout></GestorLayout>
@@ -129,7 +144,26 @@ export const AnimalesPage = () => {
 
           />
         </div>
-      
+        <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+          <DialogTitle id="alert-dialog-title">{avise.titulo}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="1">
+              {avise.contenido}
+            </DialogContentText>
+            <DialogContentText id="2">
+              {avise?.create}
+            </DialogContentText>
+            <DialogContentText id="3">
+              {avise?.update}
+            </DialogContentText>
+            <DialogContentText id="4">
+              {avise?.error}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} disabled={avise.activeButton}>Aceptar</Button>
+          </DialogActions>
+        </Dialog>
       </Grid>
     )
   }

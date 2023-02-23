@@ -305,9 +305,38 @@ export const sendFiletoBack = (email, token, PlanillaAnimales) => {
             const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/animalSheet", { email, PlanillaAnimales }, { headers })
             console.log(resp)
             dispatch(successMessage(resp.data.message))
+            if (resp.status == 200) {
+                let mensaje ={"titulo": "Archivo cargado con éxito", "contenido":"Detalles", "activeButton":false}
+                const data = resp.data.data
+                const createdAnimals=data.createdAnimals
+                const errors=data.errors
+                const updatedAnimals=data.updatedAnimals
+                if(createdAnimals.length>0)
+                {
+                    let text= "Se crearon los siguientes animales: "
+                    createdAnimals.map(animal  => {text=text+animal.dispositivo+", "})
+                    const newText = text.slice(0, -2) 
+                    mensaje["create"] = newText
+                }
+                if(updatedAnimals.length>0)
+                {
+                    let text= "Se han actualizado los siguientes animales: "
+                    updatedAnimals.map(animal  => {text=text+animal.dispositivo+", "})
+                    const newText = text.slice(0, -2) 
+                    mensaje["update"] = newText
+                }
+                if(errors.length>0)
+                {
+                    let text= "Se han encontrado errores en las siguientes filas: "
+                    errors.map(animal  => {text=text+animal.row+", "})
+                    const newText = text.slice(0, -2) 
+                    mensaje["error"] = newText
+                }
+                dispatch(successMessage(mensaje))
+            }
         }
         catch (error) {
-            console.log(error)
+            //PENDIENTE DE DEFINICION CON CAMBIO FINAL
             dispatch(errorMessage(error.response.data.message))
         }
         dispatch(loadComponent(Math.random()))

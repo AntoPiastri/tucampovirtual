@@ -46,7 +46,6 @@ export const GestorPage = () => {
                         <Button variant="contained" color="primary" onClick={goToTSanitarioPage}>Registrar Sanitario</Button>
                     </Grid>
                 </Grid>
-                
             </Grid>
             
             
