@@ -1,4 +1,4 @@
-import { CssOutlined, FileUploadOutlined } from "@mui/icons-material"
+import { FileUploadOutlined } from "@mui/icons-material"
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, IconButton, Typography } from "@mui/material"
 import { DataGrid, esES, GridToolbarContainer, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid"
 import { useState } from "react"
@@ -7,7 +7,6 @@ import { useSelector, useDispatch } from "react-redux"
 import { selectErrorMessage, selectEstablecimiento, selectLoadComponent, selectSuccessMessage, selectUser } from "../../store/auth"
 import { obtenerAnimales, sendFiletoBack } from "../../store/auth/thunks"
 import { GestorLayout } from "../layout/GestorLayout"
-import * as XLSX from "xlsx"
 
 
 
