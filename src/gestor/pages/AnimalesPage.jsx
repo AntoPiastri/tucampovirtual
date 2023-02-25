@@ -1,4 +1,4 @@
-import { FileUploadOutlined } from "@mui/icons-material"
+import { CssOutlined, FileUploadOutlined } from "@mui/icons-material"
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, IconButton, Typography } from "@mui/material"
 import { DataGrid, esES, GridToolbarContainer, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid"
 import { useState } from "react"
@@ -40,6 +40,16 @@ export const AnimalesPage = () => {
     useEffect(() => { const funcionTest = async () => { cargarAnimales(await obtenerAnimales(user.email, user.token, dicoseFisco)) }; funcionTest() }, [])
 
 
+    const filtroDisponibleVenta = (estado) =>{
+      if (estado==true)
+      {
+        return "Sí"
+      }
+      else{
+        return "No"
+      }
+
+    }
     const filtrarAnimales = () => {
       let animalesAux = [];
       animales?.map(animal => (animalesAux.push({
@@ -54,18 +64,31 @@ export const AnimalesPage = () => {
         statusVida: animal.statusVida,
         statusTrazabilidad: animal.statusTrazabilidad,
         pesoActual: animal.pesoActual,
-        disponibleVenta: animal.disponibleVenta
+        disponibleVenta: filtroDisponibleVenta(animal.disponibleVenta)
       })))
       return animalesAux
     }
     animales = filtrarAnimales();
 
+    const  [file, setFile]  = useState(null)
+    useEffect(() => {  if (file!=null )dispatch(sendFiletoBack(user.email, user.token, file))}, file)
+
+    const secondFuncion = (auxFileForBack) => {
+      setFile(auxFileForBack)
+    }
+    const getFile =  (file) => {
+      const reader = new FileReader();
+      reader.onload = function(progressEvent){
+        secondFuncion(this.result);
+      };
+      reader.readAsText(file);
+      
+    }
     const fileInputRef = useRef();
-    const onFileInputChange = ({ target }) => {
+    const onFileInputChange =  ({ target }) => {
       if (target.files === 0) return;
-      console.log(target.files[0])
-      dispatch(sendFiletoBack(user.email, user.token, target.files[0]))
-      handleClickOpen()
+      getFile(target.files[0])
+      //handleClickOpen()
     };
 
     const columns = [
@@ -83,22 +106,7 @@ export const AnimalesPage = () => {
       { field: 'disponibleVenta', headerName: 'Disponible para venta', width: 180 },
     ];
 
-    const rows = [
-      {
-        id: 28932485,
-        raza: "HE",
-        cruza: "AA",
-        sexo: "Hembra",
-        edadMeses: "128",
-        dicosePropietario: "150722098",
-        dicoseUbicacion: "10916399",
-        dicoseTenedor: "150722098",
-        statusVida: "Vivo",
-        statusTrazabilidad: "Trazado",
-        pesoActual: "0",
-        disponibleVenta: false
-      }
-    ]
+  
 
 
     function CustomToolbar() {
@@ -136,19 +144,19 @@ export const AnimalesPage = () => {
               marginTop: "5%",
               p: 4,
               fontSize: 16,
-              color: "white",
+              color: "black",
               font: 'center',
               borderColor: 'rgba(0, 0, 0, 0)',
-              backgroundColor: "rgba(0, 0, 0, 0.1)"
+              backgroundColor: "rgba(255, 255, 255, 0.3)"
             }}
 
           />
         </div>
         <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-          <DialogTitle id="alert-dialog-title">{avise.titulo}</DialogTitle>
+          <DialogTitle id="alert-dialog-title">{avise?.titulo}</DialogTitle>
           <DialogContent>
             <DialogContentText id="1">
-              {avise.contenido}
+              {avise?.contenido}
             </DialogContentText>
             <DialogContentText id="2">
               {avise?.create}
@@ -161,7 +169,7 @@ export const AnimalesPage = () => {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} disabled={avise.activeButton}>Aceptar</Button>
+            <Button onClick={handleClose} disabled={avise?.activeButton}>Aceptar</Button>
           </DialogActions>
         </Dialog>
       </Grid>

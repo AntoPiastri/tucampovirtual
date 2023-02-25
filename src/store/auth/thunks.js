@@ -4,6 +4,7 @@ import { errorMessage, establecimiento, establecimientos, loadComponent, login, 
 
 
 
+
 export const registroUsuario = (name, email, password) => {
     return async (dispatch) => {
         try {
@@ -192,14 +193,12 @@ export const deleteUser = (email, token,) => {
             "Content-Type": "application/json",
             "Authorization": token
         }
-        try 
-        {
+        try {
             const resp = await generalApiV1.post("user/delete", { email }, { headers })
             dispatch(successMessage(resp.data.message))
             dispatch(logout());
         }
-        catch (error) 
-        {
+        catch (error) {
             dispatch(errorMessage(error.response.data.message))
         }
     }
@@ -290,11 +289,123 @@ export const obtenerAnimales = async (email, token, dicoseFisico) => {
 
 }
 
+
+//AuxFunctions
+const formatAnimal = (item) => {
+    const animal = {}
+    const aux = item.split("\n")
+    let newList = []
+    for (const element in aux)
+    {
+        const campo = aux[element]
+        if(campo.includes("<TD"))
+        {
+            newList.push(campo)
+        }
+    }
+    for(const element in newList)
+    {
+        if(element==0)
+        {
+            let dispositivo = newList[element]
+            dispositivo=dispositivo.replaceAll("<TD>","")
+            dispositivo=dispositivo.replaceAll("</TD>","")
+            animal.dispositivo=dispositivo
+        }
+        else if(element==1)
+        {
+            let raza = newList[element]
+            raza=raza.replaceAll("<TD>","")
+            raza=raza.replaceAll("</TD>","")
+            animal.raza=raza
+        }
+        else if(element==2)
+        {
+            let cruza = newList[element]
+            cruza=cruza.replaceAll("<TD>","")
+            cruza=cruza.replaceAll("</TD>","")
+            animal.cruza=cruza
+        }
+        else if(element==3)
+        {
+            let sexo = newList[element]
+            sexo=sexo.replaceAll("<TD>","")
+            sexo=sexo.replaceAll("</TD>","")
+            animal.sexo=sexo
+        }
+        else if(element==4)
+        {
+            let edadMeses = newList[element]
+            edadMeses=edadMeses.replaceAll("<TD>","")
+            edadMeses=edadMeses.replaceAll("</TD>","")
+            animal.edadMeses=edadMeses
+        }
+        else if(element==5)
+        {
+            let edadDias = newList[element]
+            edadDias=edadDias.replaceAll("<TD>","")
+            edadDias=edadDias.replaceAll("</TD>","")
+            animal.edadDias=edadDias
+        }
+        else if(element==6)
+        {
+            let dicosePropietario = newList[element]
+            dicosePropietario=dicosePropietario.replaceAll("<TD style=\"mso-number-format:&quot;@&quot;\">","")
+            dicosePropietario=dicosePropietario.replaceAll("</TD>","")
+            animal.dicosePropietario=dicosePropietario
+        }
+        else if(element==7)
+        {
+            let dicoseUbicacion = newList[element]
+            dicoseUbicacion=dicoseUbicacion.replaceAll("<TD style=\"mso-number-format:&quot;@&quot;\">","")
+            dicoseUbicacion=dicoseUbicacion.replaceAll("</TD>","")
+            animal.dicoseUbicacion=dicoseUbicacion
+        }
+        else if(element==8)
+        {
+            let dicoseTenedor = newList[element]
+            dicoseTenedor=dicoseTenedor.replaceAll("<TD style=\"mso-number-format:&quot;@&quot;\">","")
+            dicoseTenedor=dicoseTenedor.replaceAll("</TD>","")
+            animal.dicoseTenedor=dicoseTenedor
+        }
+        else if(element==9)
+        {
+            let status = newList[element]
+            status=status.replaceAll("<TD>","")
+            status=status.replaceAll("</TD>","")
+            animal.status=status
+        }
+        else if(element==10)
+        {
+            let trazabilidad = newList[element]
+            trazabilidad=trazabilidad.replaceAll("<TD>","")
+            trazabilidad=trazabilidad.replaceAll("</TD>","")
+            animal.trazabilidad=trazabilidad
+        }
+        else if(element==11)
+        {
+            let errores = newList[element]
+            errores=errores.replaceAll("<TD>","")
+            errores=errores.replaceAll("</TD>","")
+            animal.errores=errores
+        }
+        
+    }
+    return animal;
+}
+const sanitize = (file) => {
+    const animales = []
+    file= file.replaceAll("<TR>",",")
+    file= file.replaceAll("</TR>","")
+    let aux = file.split(",")
+    aux.shift()
+    aux.shift()
+    aux.map(item => (animales.push(formatAnimal(item))))
+    return animales;
+}
 export const sendFiletoBack = (email, token, PlanillaAnimales) => {
     return async (dispatch) => {
-        console.log(email)
-        console.log(token)
-        console.log(PlanillaAnimales)
+        console.log(sanitize(PlanillaAnimales))
         token = "Bearer " + token;
         const headers = {
             "Content-Type": "multipart/form-data",
@@ -306,30 +417,27 @@ export const sendFiletoBack = (email, token, PlanillaAnimales) => {
             console.log(resp)
             dispatch(successMessage(resp.data.message))
             if (resp.status == 200) {
-                let mensaje ={"titulo": "Archivo cargado con éxito", "contenido":"Detalles", "activeButton":false}
+                let mensaje = { "titulo": "Archivo cargado con éxito", "contenido": "Detalles", "activeButton": false }
                 const data = resp.data.data
-                const createdAnimals=data.createdAnimals
-                const errors=data.errors
-                const updatedAnimals=data.updatedAnimals
-                if(createdAnimals.length>0)
-                {
-                    let text= "Se crearon los siguientes animales: "
-                    createdAnimals.map(animal  => {text=text+animal.dispositivo+", "})
-                    const newText = text.slice(0, -2) 
+                const createdAnimals = data.createdAnimals
+                const errors = data.errors
+                const updatedAnimals = data.updatedAnimals
+                if (createdAnimals.length > 0) {
+                    let text = "Se crearon los siguientes animales: "
+                    createdAnimals.map(animal => { text = text + animal.dispositivo + ", " })
+                    const newText = text.slice(0, -2)
                     mensaje["create"] = newText
                 }
-                if(updatedAnimals.length>0)
-                {
-                    let text= "Se han actualizado los siguientes animales: "
-                    updatedAnimals.map(animal  => {text=text+animal.dispositivo+", "})
-                    const newText = text.slice(0, -2) 
+                if (updatedAnimals.length > 0) {
+                    let text = "Se han actualizado los siguientes animales: "
+                    updatedAnimals.map(animal => { text = text + animal.dispositivo + ", " })
+                    const newText = text.slice(0, -2)
                     mensaje["update"] = newText
                 }
-                if(errors.length>0)
-                {
-                    let text= "Se han encontrado errores en las siguientes filas: "
-                    errors.map(animal  => {text=text+animal.row+", "})
-                    const newText = text.slice(0, -2) 
+                if (errors.length > 0) {
+                    let text = "Se han encontrado errores en las siguientes filas: "
+                    errors.map(animal => { text = text + animal.row + ", " })
+                    const newText = text.slice(0, -2)
                     mensaje["error"] = newText
                 }
                 dispatch(successMessage(mensaje))
@@ -464,3 +572,6 @@ export const saveInfoEstablecimiento = (nombre, dicoseFisico) => {
     }
 
 }
+
+
+
