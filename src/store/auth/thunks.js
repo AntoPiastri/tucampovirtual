@@ -3,8 +3,6 @@ import { generalApiV1, generalSystemApi, loginApi } from "../../apis";
 import { errorMessage, establecimiento, establecimientos, loadComponent, login, logout, successMessage } from "./authSlide"
 
 
-
-
 /*
 if(sUsrAg.indexOf("Chrome") > -1) {
     sBrowser = "Google Chrome";
@@ -73,10 +71,13 @@ export const registroUsuario = (name, email, password) => {
             const resp = await generalSystemApi.post("https://backend-software-ganadero.azurewebsites.net/api/v1/system/signUp", { name, email, password });
             if (resp.status == 201) {
                 dispatch(checkingAuth(email, password))
+                dispatch(saveToBigQuery(tabla,{"Servicio":"Registro de usuario","URL":generalSystemApi.getUri(),"Endpoint":"signUp","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
             }
 
         }
         catch (error) {
+            //SERVICIO SIN MANEJO DE ERRORES
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Registro de usuario","URL":generalSystemApi.getUri(),"Endpoint":"signUp","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
             console.log(error.response.data.message)
             dispatch(errorMessage(error.response.data.message))
 
@@ -92,11 +93,11 @@ export const checkingAuth = (email, password) => {
             const resp = await generalSystemApi.post("signIn", { email, password });
             if (resp.status == 200) {
                 dispatch(login({ isLogged: true, token: resp.data.data.accessToken, nombre: resp.data.data.name, email: email }));
-                dispatch(saveToBigQuery(tabla,{"Servicio":"Inicio de Sesión","URL":generalSystemApi.getUri(),"Endpoint":"signIn","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
+                dispatch(saveToBigQuery(tabla,{"Servicio":"Inicio de sesión","URL":generalSystemApi.getUri(),"Endpoint":"signIn","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
             }
         }
         catch (error) {
-            dispatch(saveToBigQuery(tabla,{"Servicio":"Inicio de Sesión","URL":generalSystemApi.getUri(),"Endpoint":"signIn","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Inicio de sesión","URL":generalSystemApi.getUri(),"Endpoint":"signIn","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
             let errorMessageText = "";
             if (error.response.status == "400" && error.response.data.message == "Invalid username or password") {
                 errorMessageText = "La contraseña no es válida o el valor del email no pertenece a un usuario registrado"
@@ -127,9 +128,11 @@ export const sendCodeRecoveryPassword = (email) => {
             const resp = await generalSystemApi.post("requestPasswordChange", { email, passwordChangeRequestToken });
             if (resp.status == 200) {
                 dispatch(loadComponent("Success validate mail"))
+                dispatch(saveToBigQuery(tabla,{"Servicio":"Solicitar recuperación de contraseña","URL":generalSystemApi.getUri(),"Endpoint":"requestPasswordChange","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
             }
         }
         catch (error) {
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Solicitar recuperación de contraseña","URL":generalSystemApi.getUri(),"Endpoint":"requestPasswordChange","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
             if (error.response.status == "500") {
                 errorMessageText = "Error interno en el servidor"
             }
@@ -148,9 +151,11 @@ export const validateCodeRecoveryPassword = (email, userOTPCode) => {
             const resp = await generalSystemApi.post("validateOTPCode", { email, otpCodeValidationToken, userOTPCode });
             if (resp.status == 200) {
                 dispatch(loadComponent("Success validate code"))
+                dispatch(saveToBigQuery(tabla,{"Servicio":"Validar código OTP","URL":generalSystemApi.getUri(),"Endpoint":"validateOTPCode","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
             }
         }
         catch (error) {
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Validar código OTP","URL":generalSystemApi.getUri(),"Endpoint":"validateOTPCode","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
             let errorMessageText = "";
             if (error.response.status == "401") {
                 errorMessageText = "El código ingresado no es válido."
@@ -178,9 +183,11 @@ export const recoveryPassword = (email, userOTPCode, newPassword) => {
             if (resp.status == 200) {
                 dispatch(successMessage("Tu contraseña ha sido actualizada con éxito. Inicia sesión con ella."))
                 dispatch(loadComponent("Success password change"))
+                dispatch(saveToBigQuery(tabla,{"Servicio":"Recuperación de contraseña","URL":generalSystemApi.getUri(),"Endpoint":"passwordChange","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
             }
         }
         catch (error) {
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Recuperación de contraseña","URL":generalSystemApi.getUri(),"Endpoint":"passwordChange","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
             let errorMessageText = "";
             if (error.response.status == "400" && error.response.data.message == "New password could not be same as old password") {
                 errorMessageText = "La nueva contraseña no puede ser igual a la contraseña anterior"
@@ -205,16 +212,17 @@ export const updateUser = (email, token, name, password, type) => {
             "Content-Type": "application/json",
             "Authorization": token
         }
-        console.log(type)
         if (type == "name") {
             try {
                 const resp = await generalApiV1.post("user/update", { email, name }, { headers })
                 if (resp.status == 200) {
                     dispatch(successMessage("El nombre de usuario se ha actualizado correctamente"))
                     dispatch(login({ isLogged: true, token: persistToken, nombre: resp.data.data.user.name, email: email }))
+                    dispatch(saveToBigQuery(tabla,{"Servicio":"Actualizar usuario","URL":generalApiV1.getUri(),"Endpoint":"user/update","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
                 }
             }
             catch (error) {
+                dispatch(saveToBigQuery(tabla,{"Servicio":"Actualizar usuario","URL":generalApiV1.getUri(),"Endpoint":"user/update","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
                 let errorMessageText = "";
                 if (error.response.status == "500") {
                     errorMessageText = "Error interno en el servidor"
@@ -260,10 +268,13 @@ export const deleteUser = (email, token,) => {
         }
         try {
             const resp = await generalApiV1.post("user/delete", { email }, { headers })
-            dispatch(successMessage(resp.data.message))
+            dispatch(successMessage(resp.data.message));
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Eliminar usuario","URL":generalApiV1.getUri(),"Endpoint":"user/delete","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
             dispatch(logout());
         }
         catch (error) {
+            //SERVICIO PENDIENTE DE MANEJO DE ERROR
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Eliminar usuario","URL":generalApiV1.getUri(),"Endpoint":"user/delete","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
             dispatch(errorMessage(error.response.data.message))
         }
     }
@@ -271,7 +282,10 @@ export const deleteUser = (email, token,) => {
 
 export const closeSession = () => {
     return async (dispatch) => {
+        dispatch(saveToBigQuery(tabla,{"Servicio":"Cerrar sesión","URL":"generalApiV1.getUri()","user/delete":"requestPasswordChange","Status":"resp.status","Response":"Success", "Mensaje":"resp.data.message"}))
         dispatch(logout());
+        //ERROR
+        //dispatch(saveToBigQuery(tabla,{"Servicio":"Eliminar usuario","URL":generalApiV1.getUri(),"Endpoint":"user/delete","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
     }
 }
 
@@ -286,8 +300,10 @@ export const getEstablecimientos = (email, token) => {
         try {
             const resp = await generalApiV1.post("establishment/get/all", { email }, { headers })
             dispatch(establecimientos(resp.data.data.establishments))
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Obtener establecimientos","URL":generalApiV1.getUri(),"Endpoint":"establishment/get/all","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
         }
         catch (error) {
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Obtener establecimientos","URL":generalApiV1.getUri(),"Endpoint":"establishment/get/all","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
             let errorMessageText = "";
             if (error.response.status == "404" && error.response.data.message == "No Establishments found of the User") {
                 errorMessageText = "Aún no tienes establecimientos registrados."
@@ -317,9 +333,11 @@ export const agregarEstablecimiento = (email, token, nombreEstablecimiento, nomb
             const resp = await generalApiV1.post("establishment/create", { email, nombreEstablecimiento, nombreProductor, dicoseFisico, rubroPrincipal, cantidadDicosePropiedad, valoresDicosePropiedad }, { headers })
             if (resp.status == 201) {
                 dispatch(successMessage("Establecimiento creado con éxito"))
+                dispatch(saveToBigQuery(tabla,{"Servicio":"Agregar establecimiento","URL":generalApiV1.getUri(),"Endpoint":"establishment/create","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
             }
         }
         catch (error) {
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Agregar establecimiento","URL":generalApiV1.getUri(),"Endpoint":"establishment/create","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
             let errorMessageText = "";
             if (error.response.status == "400" && error.response.data.message == "Establishment already registered") {
                 errorMessageText = "El establecimiento ya se encuentra registrado"
@@ -348,9 +366,10 @@ export const obtenerAnimales = async (email, token, dicoseFisico) => {
     }
     const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/animal/get/all/byEstablishment", { email, dicoseFisico }, { headers })
     //dispatch(animales(resp.data.data.animals))
+    //dispatch(saveToBigQuery(tabla,{"Servicio":"Obtener animales","URL":generalApiV1.getUri(),"Endpoint":"animal/get/all/byEstablishment","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
     return resp.data.data.animals;
 
-
+    //dispatch(saveToBigQuery(tabla,{"Servicio":"Obtener animales","URL":generalApiV1.getUri(),"Endpoint":"animal/get/all/byEstablishment","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
 
 }
 
@@ -464,7 +483,7 @@ export const sendFiletoBack = (email, token, PlanillaAnimales) => {
 
         try {
             const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/animalSheet", { email, PlanillaAnimales }, { headers })
-            console.log(resp)
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Ingresar planilla de animales","URL":generalApiV1.getUri(),"file/animalSheet":"requestPasswordChange","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
             dispatch(successMessage(resp.data.message))
             if (resp.status == 200) {
                 let mensaje = { "titulo": "Archivo cargado con éxito", "contenido": "Detalles", "activeButton": false }
@@ -514,7 +533,7 @@ export const sendFileTrabajoPesadatoBack = (email, token, PlanillaPesadas) => {
 
         try {
             const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/pesadaSheet", { email, PlanillaPesadas }, { headers })
-            console.log(resp)
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Ingresar trabajo de pesada","URL":generalApiV1.getUri(),"file/pesadaSheet":"requestPasswordChange","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
             dispatch(successMessage(resp.data.message))
         }
         catch (error) {
@@ -539,7 +558,7 @@ export const sendFileTrabajoEcografiatoBack = (email, token, encargadoTrabajo, P
 
         try {
             const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/ecografiaSheet", { email, encargadoTrabajo, PlanillaEcografias }, { headers })
-            console.log(resp)
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Ingresar trabajo de ecografías","URL":generalApiV1.getUri(),"file/ecografiaSheet":"requestPasswordChange","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
             dispatch(successMessage(resp.data.message))
         }
         catch (error) {
@@ -566,7 +585,7 @@ export const sendFileTrabajoSanitariosGarrapatas = (email, token, principioActiv
 
         try {
             const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/controlGarrapataSheet", { email, principioActivo, nombreLote, crearAlerta, PlanillaControlGarrapatas }, { headers })
-            console.log(resp)
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Ingresar trabajo de control de garrapatas","URL":generalApiV1.getUri(),"file/controlGarrapataSheet":"requestPasswordChange","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
             dispatch(successMessage(resp.data.message))
         }
         catch (error) {
@@ -583,8 +602,10 @@ export const startServices = () => {
         try {
             const resp = await generalApiV1.get("https://backend-software-ganadero.azurewebsites.net/testServiceConnection")
             console.log(resp)
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Inicializar servicios","URL":generalApiV1.getUri(),"Endpoint":"testServiceConnection","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
         }
         catch (error) {
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Inicializar servicios","URL":generalApiV1.getUri(),"Endpoint":"testServiceConnection","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
             console.log(error.response.data.message)
             dispatch(errorMessage(error.response.data.message))
         }
