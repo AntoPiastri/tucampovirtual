@@ -1,8 +1,70 @@
+import uuid from "react-uuid";
 import { generalApiV1, generalSystemApi, loginApi } from "../../apis";
 import { errorMessage, establecimiento, establecimientos, loadComponent, login, logout, successMessage } from "./authSlide"
 
 
 
+
+/*
+if(sUsrAg.indexOf("Chrome") > -1) {
+    sBrowser = "Google Chrome";
+} else if (sUsrAg.indexOf("Safari") > -1) {
+    sBrowser = "Apple Safari";
+} else if (sUsrAg.indexOf("Opera") > -1) {
+    sBrowser = "Opera";
+} else if (sUsrAg.indexOf("Firefox") > -1) {
+    sBrowser = "Mozilla Firefox";
+} else if (sUsrAg.indexOf("MSIE") > -1) {
+    sBrowser = "Microsoft Internet Explorer";
+}
+
+                console.log(sBrowser)
+                */
+
+//Recursos para guardar Métricas en BigQuery
+const FechaYHora= (unidad) =>{
+    const hoy = new Date();
+    const fecha = hoy.getDate() + '-' + ( hoy.getMonth() + 1 ) + '-' + hoy.getFullYear();
+    const hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds();
+    if(unidad=="fecha") return fecha;
+    else if(unidad=="hora") return hora;
+}
+const tabla = "Servicios"
+export const saveToBigQuery = (tableName, data) => {
+    return async (dispatch) => {
+        const saveMetricsInsertDataToken = "b8fdca497ddf38c9a88d9ef66f1ca1cd40d367052046da43008d199848d62a0563e80f1d2f1564a6318880e77be2b6e58922e0c6830831c285bf50e110f34a14";
+        const dataSetName = "TuCampoVirtual_DEV"
+        const headers = {
+            "Content-Type": "application/json"
+        }
+        const tableRowData = {}
+
+        if(tableName="Servicios")
+        {
+            
+            //Preparar data para BQ
+            tableRowData.idSesion= uuid();
+            tableRowData.Fecha=FechaYHora("fecha");
+            tableRowData.Hora=FechaYHora("hora");
+            tableRowData.Servicio=data.Servicio;
+            tableRowData.URL=data.URL;
+            tableRowData.Endpoint=data.Endpoint;
+            tableRowData.Status=data.Status;
+            tableRowData.Response=data.Response;
+            tableRowData.Mensaje=data.Mensaje;
+            try {
+                const resp = await generalSystemApi.post("saveMetrics/insertData", { saveMetricsInsertDataToken, dataSetName, tableName, tableRowData } ,{ headers });
+            }
+            catch (error) {
+                console.log("Ha ocurrido un error mientras se almacenaban métricas de uso de la aplicación")
+            }
+        }
+        else if (tableName="Funcionalidades"){
+            console.log("Otra tabla")
+        }
+        
+    }
+}
 
 
 export const registroUsuario = (name, email, password) => {
@@ -27,11 +89,14 @@ export const checkingAuth = (email, password) => {
     return async (dispatch) => {
 
         try {
-            const resp = await loginApi.post("signIn", { email, password });
-            if (resp.status == 200) return dispatch(login({ isLogged: true, token: resp.data.data.accessToken, nombre: resp.data.data.name, email: email }));
-
+            const resp = await generalSystemApi.post("signIn", { email, password });
+            if (resp.status == 200) {
+                dispatch(login({ isLogged: true, token: resp.data.data.accessToken, nombre: resp.data.data.name, email: email }));
+                dispatch(saveToBigQuery(tabla,{"Servicio":"Inicio de Sesión","URL":generalSystemApi.getUri(),"Endpoint":"signIn","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
+            }
         }
         catch (error) {
+            dispatch(saveToBigQuery(tabla,{"Servicio":"Inicio de Sesión","URL":generalSystemApi.getUri(),"Endpoint":"signIn","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
             let errorMessageText = "";
             if (error.response.status == "400" && error.response.data.message == "Invalid username or password") {
                 errorMessageText = "La contraseña no es válida o el valor del email no pertenece a un usuario registrado"
@@ -295,108 +360,93 @@ const formatAnimal = (item) => {
     const animal = {}
     const aux = item.split("\n")
     let newList = []
-    for (const element in aux)
-    {
+    for (const element in aux) {
         const campo = aux[element]
-        if(campo.includes("<TD"))
-        {
+        if (campo.includes("<TD")) {
             newList.push(campo)
         }
     }
-    for(const element in newList)
-    {
-        if(element==0)
-        {
+    for (const element in newList) {
+        if (element == 0) {
             let dispositivo = newList[element]
-            dispositivo=dispositivo.replaceAll("<TD>","")
-            dispositivo=dispositivo.replaceAll("</TD>","")
-            animal.dispositivo=dispositivo
+            dispositivo = dispositivo.replaceAll("<TD>", "")
+            dispositivo = dispositivo.replaceAll("</TD>", "")
+            animal.dispositivo = dispositivo
         }
-        else if(element==1)
-        {
+        else if (element == 1) {
             let raza = newList[element]
-            raza=raza.replaceAll("<TD>","")
-            raza=raza.replaceAll("</TD>","")
-            animal.raza=raza
+            raza = raza.replaceAll("<TD>", "")
+            raza = raza.replaceAll("</TD>", "")
+            animal.raza = raza
         }
-        else if(element==2)
-        {
+        else if (element == 2) {
             let cruza = newList[element]
-            cruza=cruza.replaceAll("<TD>","")
-            cruza=cruza.replaceAll("</TD>","")
-            animal.cruza=cruza
+            cruza = cruza.replaceAll("<TD>", "")
+            cruza = cruza.replaceAll("</TD>", "")
+            animal.cruza = cruza
         }
-        else if(element==3)
-        {
+        else if (element == 3) {
             let sexo = newList[element]
-            sexo=sexo.replaceAll("<TD>","")
-            sexo=sexo.replaceAll("</TD>","")
-            animal.sexo=sexo
+            sexo = sexo.replaceAll("<TD>", "")
+            sexo = sexo.replaceAll("</TD>", "")
+            animal.sexo = sexo
         }
-        else if(element==4)
-        {
+        else if (element == 4) {
             let edadMeses = newList[element]
-            edadMeses=edadMeses.replaceAll("<TD>","")
-            edadMeses=edadMeses.replaceAll("</TD>","")
-            animal.edadMeses=edadMeses
+            edadMeses = edadMeses.replaceAll("<TD>", "")
+            edadMeses = edadMeses.replaceAll("</TD>", "")
+            animal.edadMeses = edadMeses
         }
-        else if(element==5)
-        {
+        else if (element == 5) {
             let edadDias = newList[element]
-            edadDias=edadDias.replaceAll("<TD>","")
-            edadDias=edadDias.replaceAll("</TD>","")
-            animal.edadDias=edadDias
+            edadDias = edadDias.replaceAll("<TD>", "")
+            edadDias = edadDias.replaceAll("</TD>", "")
+            animal.edadDias = edadDias
         }
-        else if(element==6)
-        {
+        else if (element == 6) {
             let dicosePropietario = newList[element]
-            dicosePropietario=dicosePropietario.replaceAll("<TD style=\"mso-number-format:&quot;@&quot;\">","")
-            dicosePropietario=dicosePropietario.replaceAll("</TD>","")
-            animal.dicosePropietario=dicosePropietario
+            dicosePropietario = dicosePropietario.replaceAll("<TD style=\"mso-number-format:&quot;@&quot;\">", "")
+            dicosePropietario = dicosePropietario.replaceAll("</TD>", "")
+            animal.dicosePropietario = dicosePropietario
         }
-        else if(element==7)
-        {
+        else if (element == 7) {
             let dicoseUbicacion = newList[element]
-            dicoseUbicacion=dicoseUbicacion.replaceAll("<TD style=\"mso-number-format:&quot;@&quot;\">","")
-            dicoseUbicacion=dicoseUbicacion.replaceAll("</TD>","")
-            animal.dicoseUbicacion=dicoseUbicacion
+            dicoseUbicacion = dicoseUbicacion.replaceAll("<TD style=\"mso-number-format:&quot;@&quot;\">", "")
+            dicoseUbicacion = dicoseUbicacion.replaceAll("</TD>", "")
+            animal.dicoseUbicacion = dicoseUbicacion
         }
-        else if(element==8)
-        {
+        else if (element == 8) {
             let dicoseTenedor = newList[element]
-            dicoseTenedor=dicoseTenedor.replaceAll("<TD style=\"mso-number-format:&quot;@&quot;\">","")
-            dicoseTenedor=dicoseTenedor.replaceAll("</TD>","")
-            animal.dicoseTenedor=dicoseTenedor
+            dicoseTenedor = dicoseTenedor.replaceAll("<TD style=\"mso-number-format:&quot;@&quot;\">", "")
+            dicoseTenedor = dicoseTenedor.replaceAll("</TD>", "")
+            animal.dicoseTenedor = dicoseTenedor
         }
-        else if(element==9)
-        {
+        else if (element == 9) {
             let status = newList[element]
-            status=status.replaceAll("<TD>","")
-            status=status.replaceAll("</TD>","")
-            animal.status=status
+            status = status.replaceAll("<TD>", "")
+            status = status.replaceAll("</TD>", "")
+            animal.status = status
         }
-        else if(element==10)
-        {
+        else if (element == 10) {
             let trazabilidad = newList[element]
-            trazabilidad=trazabilidad.replaceAll("<TD>","")
-            trazabilidad=trazabilidad.replaceAll("</TD>","")
-            animal.trazabilidad=trazabilidad
+            trazabilidad = trazabilidad.replaceAll("<TD>", "")
+            trazabilidad = trazabilidad.replaceAll("</TD>", "")
+            animal.trazabilidad = trazabilidad
         }
-        else if(element==11)
-        {
+        else if (element == 11) {
             let errores = newList[element]
-            errores=errores.replaceAll("<TD>","")
-            errores=errores.replaceAll("</TD>","")
-            animal.errores=errores
+            errores = errores.replaceAll("<TD>", "")
+            errores = errores.replaceAll("</TD>", "")
+            animal.errores = errores
         }
-        
+
     }
     return animal;
 }
 const sanitize = (file) => {
     const animales = []
-    file= file.replaceAll("<TR>",",")
-    file= file.replaceAll("</TR>","")
+    file = file.replaceAll("<TR>", ",")
+    file = file.replaceAll("</TR>", "")
     let aux = file.split(",")
     aux.shift()
     aux.shift()
@@ -541,6 +591,8 @@ export const startServices = () => {
 
     }
 }
+
+
 
 
 //Procedimientos asincronicos auxiliares
