@@ -29,11 +29,11 @@ export const EstablecimientosPage = () => {
         <GestorLayout>
             <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" sx={{ minHeight: "100vh", backgroundImage: `url("http://demos.alan.sh/files/images/nk4RN.png")`, backgroundSize: "cover", backgroundPosition: "10% 52%", padding: 4 }}>
             {establecimientos?.map(establecimiento => (
-                    <Button variant="contained" sx={{ marginBottom: 5, width: 1 / 2 }} key={establecimiento.dicoseFisico} onClick={() => { goToHomePage(establecimiento.dicoseFisico, establecimiento.nombreEstablecimiento) }}>{establecimiento.nombreEstablecimiento}</Button>
+                    <Button variant="contained" sx={{ marginBottom: 5, width: 1 / 4 }} key={establecimiento.dicoseFisico} onClick={() => { goToHomePage(establecimiento.dicoseFisico, establecimiento.nombreEstablecimiento) }}>{establecimiento.nombreEstablecimiento}</Button>
 
                 )
                 )}
-                <Button variant="contained" sx={{ marginBottom: 5, width: 1 / 2 }} onClick={agregarEstablecimiento} color="secondary">{"Agregar establecimiento"}</Button>
+                <Button variant="contained" sx={{ marginBottom: 5, width: 1 / 4 }} onClick={agregarEstablecimiento} color="secondary">{"Agregar establecimiento"}</Button>
              
 
             </Grid>

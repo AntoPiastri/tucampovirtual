@@ -9,14 +9,10 @@ import { GestorLayout } from "../layout/GestorLayout"
 
 export const UserPage = () => {
 
-
-
     const [open, setOpen] = useState(false);
-
     const handleClickOpen = () => {
         setOpen(true);
     };
-
     const handleClose = () => {
         setOpen(false);
     };
@@ -48,7 +44,6 @@ export const UserPage = () => {
     }
 
     const [nameChange, setNameChange] = useState(false);
-
     const showNameChange = () => {
         setNameChange(true)
     }
@@ -62,7 +57,7 @@ export const UserPage = () => {
         <Grid>
             <GestorLayout>
             </GestorLayout>
-            <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" sx={{ minHeight: "100vh", backgroundImage: `url("http://demos.alan.sh/files/images/nk4RN.png")`, backgroundSize: "cover", backgroundPosition: "10% 52%", padding: 4 }}>
+            <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" sx={{ minHeight: "100vh", backgroundImage: `url(http://demos.alan.sh/files/images/nk4RN.png")`, backgroundSize: "cover", backgroundPosition: "10% 52%", padding: 4 }}>
                 <Grid container spacing={2} direction="column" alignItems="center" justifyContent="center">
                     <Grid container spacing={4} direction="row" alignItems="center" justifyContent="center">
                         <Grid item>

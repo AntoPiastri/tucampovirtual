@@ -1,22 +1,17 @@
-import { ConstructionOutlined, MailLockOutlined, UploadFile, UploadFileRounded } from "@mui/icons-material"
-import { Button, Grid, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
-import { useState } from "react"
-import { useEffect, useRef } from "react"
-import { useSelector, useDispatch } from "react-redux"
-import { useLocation, useNavigate } from "react-router-dom"
-import { selectAnimales, selectUser } from "../../store/auth"
-import { obtenerAnimales, sendFiletoBack } from "../../store/auth/thunks"
+import { Button, Grid} from "@mui/material"
+import { useNavigate } from "react-router-dom"
 import { GestorLayout } from "../layout/GestorLayout"
 
 export const GestorPage = () => {
-
-   
 
     const navigate = useNavigate();
     const goToAnimalesPage = () =>{
         navigate("/animales")
     }
-    const goToTPesoPage = () =>{
+    const goToTrabajosPages = () =>{
+        navigate("/trabajos")
+    }
+    const goToPesoPage = () =>{
         navigate("/trabajos/peso")
     }
     const goToTReproductivoPage = () =>{
@@ -25,19 +20,22 @@ export const GestorPage = () => {
     const goToTSanitarioPage = () =>{
         navigate("/trabajos/sanitario")
     }
-    
     return(
         <Grid>
             <GestorLayout>
             </GestorLayout>
             <Grid  container spacing={0} direction= "column" alignItems="center" justifyContent="center" sx={{ minHeight: "100vh", backgroundImage:`url("http://demos.alan.sh/files/images/ujkoW.jpg")`,backgroundSize: "cover", backgroundPosition:"10% 52%", padding:4 }}>
-                
-                <Grid item container spacing={0} direction= "column" alignItems="center" justifyContent="center">
-                    <Button variant="contained" sx={{marginBottom:5 , width:1/2}} color="primary" onClick={goToAnimalesPage}>Ver Animales</Button>
+                <Grid container spacing={4} direction= "row" alignItems="center" justifyContent="center">
+                    <Grid item >
+                        <Button variant="contained" sx={{marginBottom:5 }}color="primary" onClick={goToAnimalesPage}>Ver Animales</Button>
+                    </Grid>
+                    <Grid item >
+                        <Button variant="contained" sx={{marginBottom:5}}color="primary" onClick={goToTrabajosPages}>Ver Trabajos</Button>
+                    </Grid>
                 </Grid>
                 <Grid container spacing={4} direction= "row" alignItems="center" justifyContent="center">
                     <Grid item >
-                        <Button variant="contained" color="primary" onClick={goToTPesoPage}>Registrar Pesada</Button>
+                        <Button variant="contained" color="primary" onClick={goToPesoPage}>Registrar Pesada</Button>
                     </Grid>
                     <Grid item>
                         <Button variant="contained" color="primary" onClick={goToTReproductivoPage}>Registrar Ecografías</Button>
@@ -47,8 +45,7 @@ export const GestorPage = () => {
                     </Grid>
                 </Grid>
             </Grid>
-            
-            
         </Grid>
     )
 }
+                   

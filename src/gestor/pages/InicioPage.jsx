@@ -1,17 +1,20 @@
 import { Button, Grid } from "@mui/material"
 import React from 'react';
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { startServices } from "../../store/auth/thunks";
+import uuid from "react-uuid";
+import { selectIdSesion } from "../../store/auth";
+import { setIdSesion, startServices } from "../../store/auth/thunks";
 
 
 
 export const InicioPage = () => {
-
+    const id =useSelector(selectIdSesion);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const Comenzar = () => {
-        dispatch(startServices())
+        dispatch(setIdSesion(uuid()))
+        dispatch(startServices(id))
         navigate("/auth/login")
     }
 

@@ -5,12 +5,12 @@ import { AuthLayout } from "../layout/AuthLayout"
 import { useForm } from "../../hooks"
 import { useDispatch, useSelector } from "react-redux"
 import { checkingAuth, cleanMessagge, newError } from "../../store/auth/thunks"
-import { selectErrorMessage, selectSuccessMessage, selectUser } from "../../store/auth"
+import { selectErrorMessage, selectIdSesion, selectSuccessMessage, selectUser } from "../../store/auth"
 import { useEffect, useState } from "react"
 
 export const LoginPage = () => {
 
-
+    const id =useSelector(selectIdSesion);
     const dispatch = useDispatch();
     const {email, password, onInputChange} = useForm({
         email: "",
@@ -36,7 +36,7 @@ export const LoginPage = () => {
         }
         else 
         {
-            dispatch(checkingAuth(email, password))
+            dispatch(checkingAuth(id,email, password))
         }
         
     }

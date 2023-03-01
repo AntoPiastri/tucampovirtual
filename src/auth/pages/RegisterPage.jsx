@@ -5,13 +5,14 @@ import { AuthLayout } from "../layout/AuthLayout"
 import { useForm } from "../../hooks"
 import { useDispatch, useSelector } from "react-redux"
 import { cleanMessagge, newError, registroUsuario } from "../../store/auth/thunks"
-import { selectErrorMessage, selectUser } from "../../store/auth"
+import { selectErrorMessage, selectIdSesion, selectUser } from "../../store/auth"
 import { useEffect } from "react"
 import { useState } from "react"
 
 
 export const RegisterPage = () => {
 
+    const id =useSelector(selectIdSesion);
     const { name, email, password, confirmPassword, onInputChange } = useForm({
         name: "",
         email: "",
@@ -44,7 +45,7 @@ export const RegisterPage = () => {
         }
         else 
         {
-            dispatch(registroUsuario(name, email, password))
+            dispatch(registroUsuario(id,name, email, password))
         }
     }
     const errorMessage = useSelector(selectErrorMessage)

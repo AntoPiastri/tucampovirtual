@@ -122,10 +122,6 @@ export const AgregarEstablecimientoPage = () => {
 
         }
     }
-
-
-  
-
     return (
         <GestorLayout>
             <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" sx={{ minHeight: "100vh", backgroundImage: `url("http://demos.alan.sh/files/images/nk4RN.png")`, backgroundSize: "cover", backgroundPosition: "10% 52%", padding: 4 }}>
@@ -133,7 +129,6 @@ export const AgregarEstablecimientoPage = () => {
                     xs={3}
                     sx={{ width: { sm: 450 }, backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: 3, borderRadius: 2 }}>
                     <Typography variant="h5">Ingresa tu establecimiento</Typography>
-
                     <form onSubmit={onSubmit}>
                         <Grid container>
                             <Grid item xs={12} sx={{ mt: 2 }}>
@@ -144,8 +139,7 @@ export const AgregarEstablecimientoPage = () => {
                                     fullWidth
                                     name="nombreEstablecimiento"
                                     value={nombreEstablecimiento}
-                                    onChange={onInputChange}
-                                />
+                                    onChange={onInputChange}/>
                             </Grid>
                         </Grid>
                         <Grid container>
@@ -157,8 +151,7 @@ export const AgregarEstablecimientoPage = () => {
                                     fullWidth
                                     name="nombreProductor"
                                     value={nombreProductor}
-                                    onChange={onInputChange}
-                                />
+                                    onChange={onInputChange}/>
                             </Grid>
                         </Grid>
                         <Grid container>
@@ -170,11 +163,9 @@ export const AgregarEstablecimientoPage = () => {
                                     fullWidth
                                     name="dicoseFisico"
                                     value={dicoseFisico}
-                                    onChange={onInputChange}
-                                />
+                                    onChange={onInputChange}/>
                             </Grid>
                         </Grid>
-                        
                         <Grid container>
                             <Grid item xs={12} sx={{ '& .MuiTextField-root': { mt: 2, width: '44.5ch' },}}>
                                 <TextField
@@ -183,9 +174,7 @@ export const AgregarEstablecimientoPage = () => {
                                     SelectProps={{
                                         native: true,
                                     }}
-                                    
-                                    onChange={handleRubroPrincipal}
-                                >
+                                    onChange={handleRubroPrincipal}>
                                     <option key={1} value={"Cria"}>
                                         {"Cría"}
                                     </option>
@@ -207,7 +196,6 @@ export const AgregarEstablecimientoPage = () => {
                                 </TextField>
                             </Grid>
                         </Grid>
-
                         <Grid container>
                             <Grid item xs={12} sx={{ mt: 2 }}>
                                 <TextField
@@ -245,7 +233,6 @@ export const AgregarEstablecimientoPage = () => {
                                 <Alert severity="error">{errorMessage}</Alert>
                             </Grid>
                         </Grid>
-
                         <Grid container spacing={2} sx={{ mb: 2, mt: 1 }}>
                             <Grid item xs={12} sm={12}>
                                 <Button type="submit" variant="contained" fullWidth>
@@ -258,7 +245,5 @@ export const AgregarEstablecimientoPage = () => {
                 </Grid>
             </Grid>
         </GestorLayout>
-
-
     )
 }

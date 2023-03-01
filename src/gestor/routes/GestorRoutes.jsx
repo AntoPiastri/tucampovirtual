@@ -5,10 +5,10 @@ import { AgregarEstablecimientoPage } from "../pages/AgregarEstablecimientoPage"
 import { AnimalesPage } from "../pages/AnimalesPage"
 import { EstablecimientosPage } from "../pages/EstablecimientosPage"
 import { GestorPage } from "../pages/GestorPage"
-import { InicioPage } from "../pages/InicioPage"
 import { TrabajoPesoPage } from "../pages/TrabajoPesoPage"
 import { TrabajoReproductivoPage } from "../pages/TrabajoReproductivoPage"
 import { TrabajoSanitarioPage } from "../pages/TrabajoSanitarioPage"
+import { TrabajosPages } from "../pages/TrabajosPage"
 import { UserPage } from "../pages/UserPage"
 
 export const GestorRoutes = () => {
@@ -20,15 +20,11 @@ export const GestorRoutes = () => {
     return (
         <Routes>
             /*<Route path="/" element= {<GestorPage/>}/>*/
-
             <Route path="/user" element= {<UserPage/>}/>
-
             <Route path="/establecimientos" element= {<EstablecimientosPage/>}/>
-
             <Route path="/nuevo/establecimiento" element= {<AgregarEstablecimientoPage/>}/>
-
             <Route path="/animales" element= {<AnimalesPage/>}/>
-
+            <Route path="/trabajos" element= {<TrabajosPages/>}/>
             <Route path="/trabajos/peso" element= {<TrabajoPesoPage/>}/>
             <Route path="/trabajos/reproductivo" element= {<TrabajoReproductivoPage/>}/>
             <Route path="/trabajos/sanitario" element= {<TrabajoSanitarioPage/>}/>
