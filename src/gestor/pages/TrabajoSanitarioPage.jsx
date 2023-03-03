@@ -21,7 +21,14 @@ export const TrabajoSanitarioPage = () => {
     //Funcion aux para manejo de fehca
     const FechaYHora = (unidad) => {
         const hoy = new Date();
-        const fecha = hoy.getDate() + '-' + (hoy.getMonth() + 1) + '-' + hoy.getFullYear();
+        const funAuxDate = (num) =>{
+            if(num=="1"||num=="2"||num=="3"||num=="4"||num=="5"||num=="6"||num=="7"||num=="8"||num=="9")
+            {
+                num= "0"+num;
+            }
+            return num;
+        }
+        const fecha =hoy.getFullYear() + '-' + funAuxDate(hoy.getMonth() + 1)  + '-' +  funAuxDate(hoy.getDate()); 
         const hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds();
         if (unidad == "fecha") return fecha;
         else if (unidad == "hora") return hora;

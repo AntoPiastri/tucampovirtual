@@ -736,7 +736,7 @@ export const getAlertas = (idSesion, email, token) => {
         }
     }
 }
-export const updateAlerta = ( email, token, nombreLote,principioActivo,fechaNotificacion,estadoAlerta) => {
+export const updateAlerta = (idSesion, email, token, nombreLote,principioActivo,fechaNotificacion,estadoAlerta) => {
     return async (dispatch) => {
         token = "Bearer " + token;
         const headers = {
@@ -744,27 +744,13 @@ export const updateAlerta = ( email, token, nombreLote,principioActivo,fechaNoti
             "Authorization": token
         }
         try {
-                nombreLote="Vaquillonas"
-                principioActivo="Ivermectina1-Fluazuron12.5"
-                fechaNotificacion="2023-07-09"
-                estadoAlerta="Activa"
-                console.log(email)
                 const resp = await generalApiV1.post("alertaControlGarrapata/update", { email, nombreLote,principioActivo,fechaNotificacion,estadoAlerta }, { headers })
-                dispatch(saveToBigQuery(tabla, { "Servicio": "Actualizar estado de alerta", "URL": generalApiV1.getUri(), "Endpoint": "alertaControlGarrapata/update", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
-                console.log(resp)
-                //console.log(resp.data.data.controlGarrapatas)
-                //dispatch(alertas(resp.data.data.controlGarrapatas))
-            
-        }
-        catch (error) {
-            console.log(error.response.data.message)
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Actualizar estado de alerta", "URL": generalApiV1.getUri(), "Endpoint": "alertaControlGarrapata/update", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
-       
-            let errorMessageText = "";
-            if (error.response.status == "404") {
-                errorMessageText = "Aún no hay "+trabajo.toLowerCase()+" en el sistema"
+                dispatch(successMessage("El estado de tu alerta se ha actualizado con éxito"))
+                dispatch(saveToBigQuery(tabla, {"idSesion": idSesion, "Servicio": "Actualizar estado de alerta", "URL": generalApiV1.getUri(), "Endpoint": "alertaControlGarrapata/update", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             }
-            else if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+        catch (error) {
+            let errorMessageText = "";
+            if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
                 errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
                 dispatch(closeSession())
             }
@@ -775,15 +761,10 @@ export const updateAlerta = ( email, token, nombreLote,principioActivo,fechaNoti
                 errorMessageText = error.response.data.message
             }
             dispatch(errorMessage(errorMessageText))
+            dispatch(saveToBigQuery(tabla, {"idSesion": idSesion, "Servicio": "Actualizar estado de alerta", "URL": generalApiV1.getUri(), "Endpoint": "alertaControlGarrapata/update", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
         }
     }
 }
-
-
-
-
-
-
 
 //Procedimientos asincronicos auxiliares para manejo de variables globales entre componentes
 export const setIdSesion = (id) => {
