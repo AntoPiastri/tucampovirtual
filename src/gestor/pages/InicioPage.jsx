@@ -1,5 +1,5 @@
 import { Button, Grid } from "@mui/material"
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import uuid from "react-uuid";
@@ -12,8 +12,9 @@ export const InicioPage = () => {
     const id =useSelector(selectIdSesion);
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    
+    useEffect(() => { dispatch(setIdSesion(uuid())) }, [])
     const Comenzar = () => {
-        dispatch(setIdSesion(uuid()))
         dispatch(startServices(id))
         navigate("/auth/login")
     }

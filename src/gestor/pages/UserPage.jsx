@@ -2,13 +2,14 @@ import { Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText,
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "../../hooks";
-import { selectErrorMessage, selectSuccessMessage, selectUser } from "../../store/auth";
+import { selectErrorMessage, selectIdSesion, selectSuccessMessage, selectUser } from "../../store/auth";
 import { cleanMessagge, deleteUser, newError, updateUser } from "../../store/auth/thunks";
 import { GestorLayout } from "../layout/GestorLayout"
 
 
 export const UserPage = () => {
 
+    const id =useSelector(selectIdSesion);
     const [open, setOpen] = useState(false);
     const handleClickOpen = () => {
         setOpen(true);
@@ -38,7 +39,7 @@ export const UserPage = () => {
             dispatch(newError("La contraseña debe contener al menos 8 caracteres"))
         }
         else {
-            dispatch(updateUser(user.email, user.token, newName, newPassword, type))
+            dispatch(updateUser(id,user.email, user.token, newName, newPassword, type))
         }
 
     }
@@ -51,7 +52,7 @@ export const UserPage = () => {
         setNameChange(false)
     }
     const callDeleteUser = () => {
-        dispatch(deleteUser(user.email, user.token))
+        dispatch(deleteUser(id,user.email, user.token))
     }
     return (
         <Grid>

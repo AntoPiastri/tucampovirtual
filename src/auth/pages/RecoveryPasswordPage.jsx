@@ -4,7 +4,7 @@ import { AuthLayout } from "../layout/AuthLayout"
 import { useForm } from "../../hooks"
 import { useDispatch, useSelector } from "react-redux"
 import { cleanLoadComponent, cleanMessagge, newError, recoveryPassword, sendCodeRecoveryPassword, validateCodeRecoveryPassword } from "../../store/auth/thunks"
-import { selectErrorMessage, selectLoadComponent, selectUser } from "../../store/auth"
+import { selectErrorMessage, selectIdSesion, selectLoadComponent} from "../../store/auth"
 import { useEffect } from "react"
 import { useState } from "react"
 
@@ -17,6 +17,7 @@ export const RecoveryPasswordPage = () => {
         newPassword: "",
         verifyNewPassword: ""
     })
+    const id =useSelector(selectIdSesion);
     const dispatch = useDispatch();
     const onSubmit = (event) => {
         event.preventDefault();
@@ -25,14 +26,14 @@ export const RecoveryPasswordPage = () => {
         }
         else {
             if (nameButton == "Enviar código") {
-                dispatch(sendCodeRecoveryPassword(email))
+                dispatch(sendCodeRecoveryPassword(id,email))
             }
             else if (nameButton == "Validar código") {
                 if (code.length < 10) {
                     dispatch(newError("Por favor ingresa un código válido"))
                 }
                 else {
-                    dispatch(validateCodeRecoveryPassword(email, code))
+                    dispatch(validateCodeRecoveryPassword(id,email, code))
                 }
             }
             else {
@@ -43,12 +44,10 @@ export const RecoveryPasswordPage = () => {
                     dispatch(newError("La contraseña debe tener al menos 8 caracteres"))
                 }
                 else {
-                    dispatch(recoveryPassword(email, code, newPassword))
+                    dispatch(recoveryPassword(id,email, code, newPassword))
                 }
             }
         }
-
-
     }
     //Defino función para mostrar el campo de ingresar código unicamente si la respuesta del servicio fue exitosa
     const showCodeLabel = () => {
@@ -58,7 +57,6 @@ export const RecoveryPasswordPage = () => {
             setNameButton("Validar código")
             setTextInfo("Ingresa el código recibido para validar tu identidad")
             setShowComponentsController(false)
-
         }
         else if (loadComponent == "Success validate code") {
             setNameButton("Cambiar contraseña")
@@ -129,7 +127,6 @@ export const RecoveryPasswordPage = () => {
                             onChange={onInputChange} />
                     </Grid>
                 </Grid>
-                
                 <Grid container>
                     <Grid item xs={12} sx={{ mt: 2 }} display={!!errorMessage ? "" : "none"}>
                         <Alert severity="error">{errorMessage}</Alert>

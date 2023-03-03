@@ -2,7 +2,7 @@ import { Alert, Button, Grid } from "@mui/material"
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { errorMessage, selectErrorMessage, selectEstablecimientos, selectSuccessMessage, selectUser } from "../../store/auth";
+import { errorMessage, selectErrorMessage, selectEstablecimientos, selectIdSesion, selectSuccessMessage, selectUser } from "../../store/auth";
 import { getEstablecimientos, saveInfoEstablecimiento } from "../../store/auth/thunks";
 import { GestorLayout } from "../layout/GestorLayout"
 
@@ -19,9 +19,9 @@ export const EstablecimientosPage = () => {
         dispatch(saveInfoEstablecimiento(nombreEstablecimiento, dicoseFisco))
         navigate("/")
     }
-
+    const id =useSelector(selectIdSesion);
     const user = useSelector(selectUser);
-    useEffect(() => { dispatch(getEstablecimientos(user.email, user.token)) }, [])
+    useEffect(() => { dispatch(getEstablecimientos(id,user.email, user.token)) }, [])
     const establecimientos = useSelector(selectEstablecimientos);
 
    

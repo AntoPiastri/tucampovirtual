@@ -1,30 +1,28 @@
-import { Alert, Button, FormControlLabel, Grid, IconButton, Switch, TextField, Typography } from "@mui/material"
-import { useEffect, useRef, useState } from "react";
+import { Button,  Grid, TextField, Typography } from "@mui/material"
+import { useEffect} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectAlertas, selectErrorMessage, selectSuccessMessage, selectUser } from "../../store/auth";
+import { selectAlertas, selectErrorMessage, selectIdSesion, selectSuccessMessage, selectUser } from "../../store/auth";
 import { cleanMessagge, getAlertas, updateAlerta} from "../../store/auth/thunks";
 import { GestorLayout } from "../layout/GestorLayout"
 
 
 export const AlertasPages = () => {
 
+    const id =useSelector(selectIdSesion);
     const user = useSelector(selectUser);
     const dispatch = useDispatch();
     const errorMessage = useSelector(selectErrorMessage)
     const successMessage = useSelector(selectSuccessMessage)
     useEffect(() => { if (errorMessage || successMessage) { setTimeout(function () { dispatch(cleanMessagge()); }, 5000); } }, [errorMessage, successMessage])
 
-
-    useEffect(() => { dispatch(getAlertas(user.email, user.token)) }, [])
+    
+    useEffect(() => { dispatch(getAlertas(id,user.email, user.token)) }, [])
     const alertas = useSelector(selectAlertas)
 
     const actualizarAlerta = () =>
     {
         dispatch(updateAlerta(user.email, user.token, "1","2","3","4"))
     }
-
-
-
     return (
         <Grid>
             <GestorLayout>

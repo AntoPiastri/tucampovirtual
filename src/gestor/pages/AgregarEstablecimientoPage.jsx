@@ -2,7 +2,7 @@ import { Alert, Button, Grid, TextField, Typography } from "@mui/material"
 import { useForm } from "../../hooks"
 import { useDispatch, useSelector } from "react-redux"
 import { agregarEstablecimiento, cleanMessagge, newError } from "../../store/auth/thunks"
-import { selectErrorMessage, selectSuccessMessage, selectUser } from "../../store/auth"
+import { selectErrorMessage, selectIdSesion, selectSuccessMessage, selectUser } from "../../store/auth"
 import { useEffect } from "react"
 import { GestorLayout } from "../layout/GestorLayout"
 import { useState } from "react"
@@ -44,7 +44,7 @@ export const AgregarEstablecimientoPage = () => {
     }
     useEffect(() => { const funcionTest = async () => { addCampo() }; funcionTest() }, [cantidadDicosePropiedad])
 
-
+    const id =useSelector(selectIdSesion);
     const onSubmit = (event) => {
         event.preventDefault();
         if ( nombreEstablecimiento.length<4 ) 
@@ -76,7 +76,7 @@ export const AgregarEstablecimientoPage = () => {
         }
         else 
         {
-            dispatch(agregarEstablecimiento(user.email, user.token, nombreEstablecimiento, nombreProductor, dicoseFisico, rubroPrincipal, cantidadDicosePropiedad, valoresDicosePropiedad))
+            dispatch(agregarEstablecimiento(id,user.email, user.token, nombreEstablecimiento, nombreProductor, dicoseFisico, rubroPrincipal, cantidadDicosePropiedad, valoresDicosePropiedad))
         }
         
 

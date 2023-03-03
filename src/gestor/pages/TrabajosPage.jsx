@@ -1,11 +1,10 @@
-import { FileUploadOutlined } from "@mui/icons-material"
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, IconButton, Typography } from "@mui/material"
-import { DataGrid, esES, GridToolbarContainer, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid"
+import { Alert, Button, Grid} from "@mui/material"
+import { DataGrid, esES} from "@mui/x-data-grid"
 import { useState } from "react"
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { selectEcografias, selectErrorMessage, selectEstablecimiento, selectLoadComponent, selectPesadas, selectSanitarios, selectSuccessMessage, selectUser } from "../../store/auth"
-import { cleanMessagge, getTrabajos, obtenerAnimales, sendFiletoBack } from "../../store/auth/thunks"
+import { selectEcografias, selectErrorMessage,selectIdSesion,selectPesadas, selectSanitarios, selectSuccessMessage, selectUser } from "../../store/auth"
+import { cleanMessagge, getTrabajos} from "../../store/auth/thunks"
 import { GestorLayout } from "../layout/GestorLayout"
 
 
@@ -14,7 +13,6 @@ export const TrabajosPages = () => {
   {
     const errorMessage = useSelector(selectErrorMessage)
     const successMessage = useSelector(selectSuccessMessage)
-    //useEffect(() => { if (errorMessage || successMessage) { setAvise(successMessage) } }, [successMessage])
     const user = useSelector(selectUser);
     const dispatch = useDispatch();
 
@@ -88,16 +86,9 @@ export const TrabajosPages = () => {
       { field: 'descripcion', headerName: 'Descripción', width: 500 }
     ];
 
+    const id =useSelector(selectIdSesion);
     const showTrabajo = (trabajo) => {
-      dispatch(getTrabajos(trabajo, user.email, user.token))
-      if (trabajo == "Pesadas") {
-
-      }
-      else if (trabajo == "Ecografias") {
-      }
-      else {
-
-      }
+      dispatch(getTrabajos(id,trabajo, user.email, user.token))
     }
 
 

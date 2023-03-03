@@ -3,7 +3,7 @@ import { Alert, Button, Grid, IconButton, TextField, Typography } from "@mui/mat
 import { useState } from "react";
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectErrorMessage, selectSuccessMessage, selectUser } from "../../store/auth";
+import { selectErrorMessage, selectIdSesion, selectSuccessMessage, selectUser } from "../../store/auth";
 import { cleanMessagge, sendFileTrabajoPesadatoBack } from "../../store/auth/thunks";
 import { GestorLayout } from "../layout/GestorLayout"
 
@@ -26,15 +26,11 @@ export const TrabajoPesoPage = () => {
         setFileTrabajoPesada(target.files[0])
 
     };
+    const id =useSelector(selectIdSesion);
     const onSubmit = (event) => {
         event.preventDefault();
         console.log(fileTrabajoPesada)
-        dispatch(sendFileTrabajoPesadatoBack(user.email, user.token, fileTrabajoPesada))
-
-    }
-    const onInputChange = (event) => {
-        event.preventDefault();
-        //dispatch(agregarEstablecimiento(user.email, user.token, nombreEstablecimiento, nombreProductor, dicoseFisico, rubroPrincipal, cantidadDicosePropiedad, valoresDicosePropiedad))
+        dispatch(sendFileTrabajoPesadatoBack(id,user.email, user.token, fileTrabajoPesada))
 
     }
 

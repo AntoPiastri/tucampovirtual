@@ -2,33 +2,14 @@ import { generalApiV1, generalSystemApi } from "../../apis";
 import { alertas, errorMessage, establecimiento, establecimientos, idSesion, loadComponent, login, logout, selectUser, successMessage, tEcografias, tPesadas, tSanitarios } from "./authSlide"
 
 
-/*
-if(sUsrAg.indexOf("Chrome") > -1) {
-    sBrowser = "Google Chrome";
-} else if (sUsrAg.indexOf("Safari") > -1) {
-    sBrowser = "Apple Safari";
-} else if (sUsrAg.indexOf("Opera") > -1) {
-    sBrowser = "Opera";
-} else if (sUsrAg.indexOf("Firefox") > -1) {
-    sBrowser = "Mozilla Firefox";
-} else if (sUsrAg.indexOf("MSIE") > -1) {
-    sBrowser = "Microsoft Internet Explorer";
-}
-
-                console.log(sBrowser)
-                */
-
 export const startServices = (idSesion) => {
     return async (dispatch) => {
         try {
             const resp = await generalApiV1.get("https://backend-software-ganadero.azurewebsites.net/testServiceConnection")
-            console.log(resp)
             dispatch(saveToBigQuery(tabla, { "idSesion": idSesion, "Servicio": "Inicializar servicios", "URL": generalApiV1.getUri(), "Endpoint": "testServiceConnection", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
         }
         catch (error) {
             dispatch(saveToBigQuery(tabla, { "idSesion": idSesion, "Servicio": "Inicializar servicios", "URL": generalApiV1.getUri(), "Endpoint": "testServiceConnection", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
-            console.log(error.response.data.message)
-            dispatch(errorMessage(error.response.data.message))
         }
     }
 }
@@ -79,23 +60,16 @@ export const saveToBigQuery = (tableName, data) => {
 export const registroUsuario = (idSesion,name, email, password) => {
     return async (dispatch) => {
         try {
-            console.log(name)
-            console.log(email)
-            console.log("hola"+password)
             const resp = await generalSystemApi.post("https://backend-software-ganadero.azurewebsites.net/api/v1/system/signUp", { name, email, password });
             console.log(resp)
             if (resp.status == 201) {
+                dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Registro de usuario", "URL": generalSystemApi.getUri(), "Endpoint": "signUp", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
                 dispatch(checkingAuth(idSesion,email, password))
-                dispatch(saveToBigQuery(tabla, { "Servicio": "Registro de usuario", "URL": generalSystemApi.getUri(), "Endpoint": "signUp", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             }
-
         }
         catch (error) {
-            //SERVICIO SIN MANEJO DE ERRORES
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Registro de usuario", "URL": generalSystemApi.getUri(), "Endpoint": "signUp", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
-            console.log(error.response.data.message)
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Registro de usuario", "URL": generalSystemApi.getUri(), "Endpoint": "signUp", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             dispatch(errorMessage(error.response.data.message))
-
         }
     }
 
@@ -135,18 +109,19 @@ export const checkingAuth = (idSesion, email, password) => {
     }
 
 }
-export const sendCodeRecoveryPassword = (email) => {
+export const sendCodeRecoveryPassword = (idSesion,email) => {
     return async (dispatch) => {
         const passwordChangeRequestToken = "4ab6bac4a19d71cbda199912f94ae348d7f6c0b0eb1c9271699488644519e8b68007ce33883629aa5c57229be32b0755ac734e4b0cdf71adab6ae3b6f9fff338"
         try {
             const resp = await generalSystemApi.post("requestPasswordChange", { email, passwordChangeRequestToken });
             if (resp.status == 200) {
                 dispatch(loadComponent("Success validate mail"))
-                dispatch(saveToBigQuery(tabla, { "Servicio": "Solicitar recuperación de contraseña", "URL": generalSystemApi.getUri(), "Endpoint": "requestPasswordChange", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+                dispatch(saveToBigQuery(tabla, { "idSesion": idSesion, "Servicio": "Solicitar recuperación de contraseña", "URL": generalSystemApi.getUri(), "Endpoint": "requestPasswordChange", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             }
         }
         catch (error) {
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Solicitar recuperación de contraseña", "URL": generalSystemApi.getUri(), "Endpoint": "requestPasswordChange", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion, "Servicio": "Solicitar recuperación de contraseña", "URL": generalSystemApi.getUri(), "Endpoint": "requestPasswordChange", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+            let errorMessageText =""
             if (error.response.status == "500") {
                 errorMessageText = "Error interno en el servidor"
             }
@@ -156,20 +131,19 @@ export const sendCodeRecoveryPassword = (email) => {
             dispatch(errorMessage(errorMessageText))
         }
     }
-
 }
-export const validateCodeRecoveryPassword = (email, userOTPCode) => {
+export const validateCodeRecoveryPassword = (idSesion,email, userOTPCode) => {
     return async (dispatch) => {
         const otpCodeValidationToken = "d6a363353c1265d07394fce40b840d275f266a29ace2adc8c40a31d78b274e2511363c5445550072d5000bc9bc457b206b9cc23b4e0dde103e7c60eee091f583"
         try {
             const resp = await generalSystemApi.post("validateOTPCode", { email, otpCodeValidationToken, userOTPCode });
             if (resp.status == 200) {
                 dispatch(loadComponent("Success validate code"))
-                dispatch(saveToBigQuery(tabla, { "Servicio": "Validar código OTP", "URL": generalSystemApi.getUri(), "Endpoint": "validateOTPCode", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+                dispatch(saveToBigQuery(tabla, {"idSesion": idSesion, "Servicio": "Validar código OTP", "URL": generalSystemApi.getUri(), "Endpoint": "validateOTPCode", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             }
         }
         catch (error) {
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Validar código OTP", "URL": generalSystemApi.getUri(), "Endpoint": "validateOTPCode", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Validar código OTP", "URL": generalSystemApi.getUri(), "Endpoint": "validateOTPCode", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             let errorMessageText = "";
             if (error.response.status == "401") {
                 errorMessageText = "El código ingresado no es válido."
@@ -184,12 +158,11 @@ export const validateCodeRecoveryPassword = (email, userOTPCode) => {
                 errorMessageText = error.response.data.message
             }
             dispatch(errorMessage(errorMessageText))
-
         }
     }
 
 }
-export const recoveryPassword = (email, userOTPCode, newPassword) => {
+export const recoveryPassword = (idSesion,email, userOTPCode, newPassword) => {
     return async (dispatch) => {
         const passwordChangeToken = "a401f500e31be2dbdac6c6581f8a419f11c96ef2a512c324a1aab9b1e9774c9b60d794b7e0e8cf5de0f50b53273996b7dd7b66502eab49ded3e7d9d6248641bc"
         try {
@@ -197,11 +170,11 @@ export const recoveryPassword = (email, userOTPCode, newPassword) => {
             if (resp.status == 200) {
                 dispatch(successMessage("Tu contraseña ha sido actualizada con éxito. Inicia sesión con ella."))
                 dispatch(loadComponent("Success password change"))
-                dispatch(saveToBigQuery(tabla, { "Servicio": "Recuperación de contraseña", "URL": generalSystemApi.getUri(), "Endpoint": "passwordChange", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+                dispatch(saveToBigQuery(tabla, {"idSesion": idSesion, "Servicio": "Recuperación de contraseña", "URL": generalSystemApi.getUri(), "Endpoint": "passwordChange", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             }
         }
         catch (error) {
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Recuperación de contraseña", "URL": generalSystemApi.getUri(), "Endpoint": "passwordChange", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Recuperación de contraseña", "URL": generalSystemApi.getUri(), "Endpoint": "passwordChange", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             let errorMessageText = "";
             if (error.response.status == "400" && error.response.data.message == "New password could not be same as old password") {
                 errorMessageText = "La nueva contraseña no puede ser igual a la contraseña anterior"
@@ -213,12 +186,10 @@ export const recoveryPassword = (email, userOTPCode, newPassword) => {
                 errorMessageText = error.response.data.message
             }
             dispatch(errorMessage(errorMessageText))
-
         }
     }
-
 }
-export const updateUser = (email, token, name, password, type) => {
+export const updateUser = (idSesion,email, token, name, password, type) => {
     return async (dispatch) => {
         const persistToken = token
         token = "Bearer " + token;
@@ -232,11 +203,11 @@ export const updateUser = (email, token, name, password, type) => {
                 if (resp.status == 200) {
                     dispatch(successMessage("El nombre de usuario se ha actualizado correctamente"))
                     dispatch(login({ isLogged: true, token: persistToken, nombre: resp.data.data.user.name, email: email }))
-                    dispatch(saveToBigQuery(tabla, { "Servicio": "Actualizar usuario", "URL": generalApiV1.getUri(), "Endpoint": "user/update", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+                    dispatch(saveToBigQuery(tabla, {"idSesion": idSesion, "Servicio": "Actualizar usuario", "URL": generalApiV1.getUri(), "Endpoint": "user/update", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
                 }
             }
             catch (error) {
-                dispatch(saveToBigQuery(tabla, { "Servicio": "Actualizar usuario", "URL": generalApiV1.getUri(), "Endpoint": "user/update", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+                dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Actualizar usuario", "URL": generalApiV1.getUri(), "Endpoint": "user/update", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
                 let errorMessageText = "";
                 if (error.response.status == "500") {
                     errorMessageText = "Error interno en el servidor"
@@ -256,9 +227,11 @@ export const updateUser = (email, token, name, password, type) => {
                 const resp = await generalApiV1.post("user/update", { email, password }, { headers })
                 if (resp.status == 200) {
                     dispatch(successMessage("La contraseña se ha actualizado correctamente"))
+                    dispatch(saveToBigQuery(tabla, {"idSesion": idSesion, "Servicio": "Actualizar usuario", "URL": generalApiV1.getUri(), "Endpoint": "user/update", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
                 }
             }
             catch (error) {
+                dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Actualizar usuario", "URL": generalApiV1.getUri(), "Endpoint": "user/update", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
                 let errorMessageText = "";
                 if (error.response.status == "500") {
                     errorMessageText = "Error interno en el servidor"
@@ -276,12 +249,9 @@ export const updateUser = (email, token, name, password, type) => {
                 dispatch(errorMessage(errorMessageText))
             }
         }
-
-
-
     }
 }
-export const deleteUser = (email, token,) => {
+export const deleteUser = (idSesion,email, token,) => {
     return async (dispatch) => {
         token = "Bearer " + token;
         const headers = {
@@ -291,31 +261,40 @@ export const deleteUser = (email, token,) => {
         try {
             const resp = await generalApiV1.post("user/delete", { email }, { headers })
             dispatch(successMessage(resp.data.message));
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Eliminar usuario", "URL": generalApiV1.getUri(), "Endpoint": "user/delete", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Eliminar usuario", "URL": generalApiV1.getUri(), "Endpoint": "user/delete", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             dispatch(logout());
         }
         catch (error) {
             if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
-                errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
                 dispatch(closeSession())
             }
-            //SERVICIO PENDIENTE DE MANEJO DE ERROR
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Eliminar usuario", "URL": generalApiV1.getUri(), "Endpoint": "user/delete", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+            dispatch(saveToBigQuery(tabla, {"idSesion": idSesion, "Servicio": "Eliminar usuario", "URL": generalApiV1.getUri(), "Endpoint": "user/delete", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             dispatch(errorMessage(error.response.data.message))
         }
     }
 }
-export const closeSession = () => {
+export const closeSession = (idSesion,email,token) => {
     return async (dispatch) => {
-        dispatch(saveToBigQuery(tabla, { "Servicio": "Cerrar sesión", "URL": "generalApiV1.getUri()", "user/delete": "requestPasswordChange", "Status": "resp.status", "Response": "Success", "Mensaje": "resp.data.message" }))
+        token = "Bearer " + token;
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        try {
+            const resp = await generalSystemApi.post("signOut", { email }, { headers });
+            if (resp.status == 200) {
+                dispatch(saveToBigQuery(tabla, { "idSesion": idSesion, "Servicio": "Cerrar sesión", "URL": generalSystemApi.getUri(), "Endpoint": "signOut", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+            }
+        }
+        catch (error) {
+            dispatch(saveToBigQuery(tabla,{"idSesion": idSesion, "Servicio": "Cerrar sesión", "URL": generalSystemApi.getUri(), "Endpoint": "signOut","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
+        }
         dispatch(logout());
-        //ERROR
-        //dispatch(saveToBigQuery(tabla,{"Servicio":"Eliminar usuario","URL":generalApiV1.getUri(),"Endpoint":"user/delete","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
     }
 }
 
 
-export const getEstablecimientos = (email, token) => {
+export const getEstablecimientos = (idSesion, email, token) => {
     return async (dispatch) => {
         token = "Bearer " + token;
         const headers = {
@@ -325,10 +304,10 @@ export const getEstablecimientos = (email, token) => {
         try {
             const resp = await generalApiV1.post("establishment/get/all", { email }, { headers })
             dispatch(establecimientos(resp.data.data.establishments))
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Obtener establecimientos", "URL": generalApiV1.getUri(), "Endpoint": "establishment/get/all", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Obtener establecimientos", "URL": generalApiV1.getUri(), "Endpoint": "establishment/get/all", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
         }
         catch (error) {
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Obtener establecimientos", "URL": generalApiV1.getUri(), "Endpoint": "establishment/get/all", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Obtener establecimientos", "URL": generalApiV1.getUri(), "Endpoint": "establishment/get/all", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             let errorMessageText = "";
             if (error.response.status == "404" && error.response.data.message == "No Establishments found of the User") {
                 errorMessageText = "Aún no tienes establecimientos registrados."
@@ -347,9 +326,8 @@ export const getEstablecimientos = (email, token) => {
         }
     }
 }
-export const agregarEstablecimiento = (email, token, nombreEstablecimiento, nombreProductor, dicoseFisico, rubroPrincipal, cantidadDicosePropiedad, valoresDicosePropiedad) => {
+export const agregarEstablecimiento = (idSesion,email, token, nombreEstablecimiento, nombreProductor, dicoseFisico, rubroPrincipal, cantidadDicosePropiedad, valoresDicosePropiedad) => {
     return async (dispatch) => {
-        console.log("accedio a fun")
         token = "Bearer " + token;
         const headers = {
             "Content-Type": "application/json",
@@ -359,11 +337,11 @@ export const agregarEstablecimiento = (email, token, nombreEstablecimiento, nomb
             const resp = await generalApiV1.post("establishment/create", { email, nombreEstablecimiento, nombreProductor, dicoseFisico, rubroPrincipal, cantidadDicosePropiedad, valoresDicosePropiedad }, { headers })
             if (resp.status == 201) {
                 dispatch(successMessage("Establecimiento creado con éxito"))
-                dispatch(saveToBigQuery(tabla, { "Servicio": "Agregar establecimiento", "URL": generalApiV1.getUri(), "Endpoint": "establishment/create", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+                dispatch(saveToBigQuery(tabla, {"idSesion": idSesion, "Servicio": "Agregar establecimiento", "URL": generalApiV1.getUri(), "Endpoint": "establishment/create", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             }
         }
         catch (error) {
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Agregar establecimiento", "URL": generalApiV1.getUri(), "Endpoint": "establishment/create", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Agregar establecimiento", "URL": generalApiV1.getUri(), "Endpoint": "establishment/create", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             let errorMessageText = "";
             if (error.response.status == "400" && error.response.data.message == "Establishment already registered") {
                 errorMessageText = "El establecimiento ya se encuentra registrado"
@@ -511,7 +489,7 @@ const sanitize = (file) => {
     return animales;
 }
 //Llamados para carga de animales y trabajos
-export const sendFiletoBack = (email, token, PlanillaAnimales) => {
+export const sendFiletoBack = (idSesion, email, token, PlanillaAnimales) => {
 
     return async (dispatch) => {
        
@@ -535,7 +513,7 @@ export const sendFiletoBack = (email, token, PlanillaAnimales) => {
 
         try {
             const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/animalSheet", { email, valoresPlanillaAnimales }, { headers })
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Ingresar planilla de animales", "URL": generalApiV1.getUri(), "file/animalSheet": "requestPasswordChange", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Ingresar planilla de animales", "URL": generalApiV1.getUri(),"Endpoint": "file/animalSheet", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             dispatch(successMessage(resp.data.message))
             console.log(resp)
             if (resp.status == 200) {
@@ -566,16 +544,16 @@ export const sendFiletoBack = (email, token, PlanillaAnimales) => {
             }
         }
         catch (error) {
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Ingresar planilla de animales", "URL": generalApiV1.getUri(), "Endpoint": "file/animalSheet", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
                 errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
                 dispatch(closeSession())
             }
             dispatch(errorMessage(error.response.data.message))
         }
-        dispatch(loadComponent(Math.random()))
     }
 }
-export const sendFileTrabajoPesadatoBack = (email, token, PlanillaPesadas) => {
+export const sendFileTrabajoPesadatoBack = (idSesion,email, token, PlanillaPesadas) => {
     return async (dispatch) => {
         token = "Bearer " + token;
         const headers = {
@@ -585,25 +563,25 @@ export const sendFileTrabajoPesadatoBack = (email, token, PlanillaPesadas) => {
 
         try {
             const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/pesadaSheet", { email, PlanillaPesadas }, { headers })
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Ingresar trabajo de pesada", "URL": generalApiV1.getUri(), "file/pesadaSheet": "requestPasswordChange", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Ingresar trabajo de pesada", "URL": generalApiV1.getUri(), "Endpoint": "file/pesadaSheet",  "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             let message = resp.data.message
             message = message.replaceAll("File", "Archivo")
             message = message.replaceAll("saved successfully", "guardado exitosamente.")
             dispatch(successMessage(message))
         }
         catch (error) {
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Ingresar trabajo de pesada", "URL": generalApiV1.getUri(), "Endpoint": "file/pesadaSheet", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             let errorMessageText = ""
             if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
                 errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
                 dispatch(closeSession())
             }
-            console.log(error.response.data.message)
             dispatch(errorMessage(error.response.data.message))
         }
 
     }
 }
-export const sendFileTrabajoEcografiatoBack = (email, token, encargadoTrabajo, PlanillaEcografias) => {
+export const sendFileTrabajoEcografiatoBack = (idSesion,email, token, encargadoTrabajo, PlanillaEcografias) => {
     return async (dispatch) => {
         token = "Bearer " + token;
         const headers = {
@@ -612,13 +590,14 @@ export const sendFileTrabajoEcografiatoBack = (email, token, encargadoTrabajo, P
         }
         try {
             const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/ecografiaSheet", { email, encargadoTrabajo, PlanillaEcografias }, { headers })
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Ingresar trabajo de ecografías", "URL": generalApiV1.getUri(), "file/ecografiaSheet": "requestPasswordChange", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+            dispatch(saveToBigQuery(tabla, {"idSesion": idSesion, "Servicio": "Ingresar trabajo de ecografías", "URL": generalApiV1.getUri(), "Endpoint": "file/ecografiaSheet", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             let message = resp.data.message
             message = message.replaceAll("File", "Archivo")
             message = message.replaceAll("saved successfully", "guardado exitosamente.")
             dispatch(successMessage(message))
         }
         catch (error) {
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Ingresar trabajo de ecografías", "URL": generalApiV1.getUri(), "Endpoint": "file/ecografiaSheet", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             let errorMessageText = ""
             if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
                 errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
@@ -629,7 +608,7 @@ export const sendFileTrabajoEcografiatoBack = (email, token, encargadoTrabajo, P
         }
     }
 }
-export const sendFileTrabajoSanitariosGarrapatas = (email, token, principioActivo, nombreLote,fecha, crearAlerta, PlanillaControlGarrapatas) => {
+export const sendFileTrabajoSanitariosGarrapatas = (idSesion,email, token, principioActivo, nombreLote,fecha, crearAlerta, PlanillaControlGarrapatas) => {
     return async (dispatch) => {
         token = "Bearer " + token;
         const headers = {
@@ -637,16 +616,16 @@ export const sendFileTrabajoSanitariosGarrapatas = (email, token, principioActiv
             "Authorization": token
         }
         const fechaRealizacionTrabajo =fecha.replaceAll("-","/")
-        console.log(fecha)
         try {
             const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/controlGarrapataSheet", { email, principioActivo, nombreLote, fechaRealizacionTrabajo, crearAlerta, PlanillaControlGarrapatas }, { headers })
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Ingresar trabajo de control de garrapatas", "URL": generalApiV1.getUri(), "file/controlGarrapataSheet": "requestPasswordChange", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+            dispatch(saveToBigQuery(tabla, {  "idSesion": idSesion,"Servicio": "Ingresar trabajo de control de garrapatas", "URL": generalApiV1.getUri(),"Endpoint": "file/controlGarrapataSheet", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             let message = resp.data.message
             message = message.replaceAll("File", "Archivo")
             message = message.replaceAll("saved successfully", "guardado exitosamente.")
             dispatch(successMessage(message))
         }
         catch (error) {
+            dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Ingresar trabajo de control de garrapatas", "URL": generalApiV1.getUri(), "Endpoint": "file/controlGarrapataSheet", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             let errorMessageText = ""
             if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
                 errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
@@ -658,49 +637,49 @@ export const sendFileTrabajoSanitariosGarrapatas = (email, token, principioActiv
     }
 }
 //Llamado para obtener todos los trabajos realizados
-export const getTrabajos = (trabajo, email, token) => {
+export const getTrabajos = (idSesion,trabajo, email, token) => {
     return async (dispatch) => {
         token = "Bearer " + token;
         const headers = {
             "Content-Type": "application/json",
             "Authorization": token
         }
-        console.log(email)
         try {
             const searchEmail = email;
             if(trabajo=="Pesadas")
             {
                 const resp = await generalApiV1.post("pesada/get/all/byUser", { email, searchEmail }, { headers })
-                dispatch(saveToBigQuery(tabla, { "Servicio": "Obtener trabajos de pesadas del usuario", "URL": generalApiV1.getUri(), "Endpoint": "pesada/get/all/byUser", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+                dispatch(saveToBigQuery(tabla, { "idSesion": idSesion, "Servicio": "Obtener trabajos de pesadas del usuario", "URL": generalApiV1.getUri(), "Endpoint": "pesada/get/all/byUser", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
                 dispatch(tPesadas(resp.data.data.pesadas))
             }
             else if(trabajo=="Ecografias")
             {
                 const resp = await generalApiV1.post("ecografia/get/all/byUser", { email, searchEmail }, { headers })
-                dispatch(saveToBigQuery(tabla, { "Servicio": "Obtener trabajos de ecografias del usuario", "URL": generalApiV1.getUri(), "Endpoint": "ecografia/get/all/byUser", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+                dispatch(saveToBigQuery(tabla, { "idSesion": idSesion, "Servicio": "Obtener trabajos de ecografias del usuario", "URL": generalApiV1.getUri(), "Endpoint": "ecografia/get/all/byUser", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
                 dispatch(tEcografias(resp.data.data.ecografias))
             }
             else if(trabajo=="Sanitarios")
             {
-                trabajo= "trabajos "+trabajo
+                
                 const resp = await generalApiV1.post("controlGarrapata/get/all/byUser", { email, searchEmail }, { headers })
-                dispatch(saveToBigQuery(tabla, { "Servicio": "Obtener trabajos sanitarios del usuario", "URL": generalApiV1.getUri(), "Endpoint": "controlGarrapata/get/all/byUser", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+                dispatch(saveToBigQuery(tabla, { "idSesion": idSesion, "Servicio": "Obtener trabajos sanitarios del usuario", "URL": generalApiV1.getUri(), "Endpoint": "controlGarrapata/get/all/byUser", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
                 dispatch(tSanitarios(resp.data.data.controlGarrapatas))
+                trabajo= "trabajos "+trabajo
             }
             
         }
         catch (error) {
             if(trabajo=="Pesadas")
             {
-                dispatch(saveToBigQuery(tabla, { "Servicio":"Obtener trabajos de pesadas del usuario", "URL": generalApiV1.getUri(), "Endpoint": "pesada/get/all/byUser", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+                dispatch(saveToBigQuery(tabla, { "idSesion": idSesion, "Servicio":"Obtener trabajos de pesadas del usuario", "URL": generalApiV1.getUri(), "Endpoint": "pesada/get/all/byUser", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             }
             else if(trabajo=="Ecografias")
             {
-                dispatch(saveToBigQuery(tabla, { "Servicio": "Obtener trabajos de ecografias del usuario", "URL": generalApiV1.getUri(), "Endpoint": "ecografia/get/all/byUser", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+                dispatch(saveToBigQuery(tabla, {  "idSesion": idSesion,"Servicio": "Obtener trabajos de ecografias del usuario", "URL": generalApiV1.getUri(), "Endpoint": "ecografia/get/all/byUser", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             }
             else if(trabajo=="Sanitarios")
             {
-                dispatch(saveToBigQuery(tabla, { "Servicio":"Obtener trabajos sanitarios del usuario", "URL": generalApiV1.getUri(), "Endpoint": "controlGarrapata/get/all/byUser", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+                dispatch(saveToBigQuery(tabla, {  "idSesion": idSesion,"Servicio":"Obtener trabajos sanitarios del usuario", "URL": generalApiV1.getUri(), "Endpoint": "controlGarrapata/get/all/byUser", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             }
            
             let errorMessageText = "";
@@ -723,7 +702,7 @@ export const getTrabajos = (trabajo, email, token) => {
 }
 
 //Llamado para obtener todas las alertas del usuario
-export const getAlertas = ( email, token) => {
+export const getAlertas = (idSesion, email, token) => {
     return async (dispatch) => {
         token = "Bearer " + token;
         const headers = {
@@ -732,21 +711,16 @@ export const getAlertas = ( email, token) => {
         }
         try {
             const searchEmail = email;
-            
                 const resp = await generalApiV1.post("alertaControlGarrapata/get/all/byUser", { email, searchEmail }, { headers })
-                dispatch(saveToBigQuery(tabla, { "Servicio": "Obtener alertas del usuario", "URL": generalApiV1.getUri(), "Endpoint": "alertaControlGarrapata/get/all/byUser", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
-                console.log(resp)
-                console.log(resp.data.data.controlGarrapatas)
+                dispatch(saveToBigQuery(tabla, { "idSesion": idSesion,"Servicio": "Obtener alertas del usuario", "URL": generalApiV1.getUri(), "Endpoint": "alertaControlGarrapata/get/all/byUser", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
                 dispatch(alertas(resp.data.data.controlGarrapatas))
             
         }
         catch (error) {
-        
-            dispatch(saveToBigQuery(tabla, { "Servicio": "Obtener alertas del usuario", "URL": generalApiV1.getUri(), "Endpoint": "alertaControlGarrapata/get/all/byUser", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
-       
+            dispatch(saveToBigQuery(tabla, {"idSesion": idSesion, "Servicio": "Obtener alertas del usuario", "URL": generalApiV1.getUri(), "Endpoint": "alertaControlGarrapata/get/all/byUser", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             let errorMessageText = "";
             if (error.response.status == "404") {
-                errorMessageText = "Aún no hay "+trabajo.toLowerCase()+" en el sistema"
+                errorMessageText = "No tienes alertas registradas en el sistema"
             }
             else if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
                 errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
@@ -812,7 +786,6 @@ export const updateAlerta = ( email, token, nombreLote,principioActivo,fechaNoti
 
 
 //Procedimientos asincronicos auxiliares para manejo de variables globales entre componentes
-
 export const setIdSesion = (id) => {
     return async (dispatch) => {
         dispatch(idSesion(id))

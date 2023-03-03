@@ -3,7 +3,7 @@ import { Alert, Button, Grid, IconButton, TextField, Typography } from "@mui/mat
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "../../hooks";
-import { selectErrorMessage, selectSuccessMessage, selectUser } from "../../store/auth";
+import { selectErrorMessage, selectIdSesion, selectSuccessMessage, selectUser } from "../../store/auth";
 import { cleanMessagge, sendFileTrabajoEcografiatoBack, sendFileTrabajoPesadatoBack } from "../../store/auth/thunks";
 import { GestorLayout } from "../layout/GestorLayout"
 
@@ -30,11 +30,12 @@ export const TrabajoReproductivoPage = () => {
         setFileTrabajoEcografia(target.files[0])
 
     };
+
+    const id =useSelector(selectIdSesion);
     const onSubmit = (event) => {
         event.preventDefault();
         console.log(fileTrabajoEcografia)
-        dispatch(sendFileTrabajoEcografiatoBack(user.email, user.token, encargadoTrabajo ,fileTrabajoEcografia))
-
+        dispatch(sendFileTrabajoEcografiatoBack(id,user.email, user.token, encargadoTrabajo ,fileTrabajoEcografia))
     }
     
 

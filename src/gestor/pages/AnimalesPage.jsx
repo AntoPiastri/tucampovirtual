@@ -4,7 +4,7 @@ import { DataGrid, esES, GridToolbarContainer, GridToolbarExport, GridToolbarFil
 import { useState } from "react"
 import { useEffect, useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { selectErrorMessage, selectEstablecimiento, selectLoadComponent, selectSuccessMessage, selectUser } from "../../store/auth"
+import { selectErrorMessage, selectEstablecimiento, selectIdSesion, selectLoadComponent, selectSuccessMessage, selectUser } from "../../store/auth"
 import { obtenerAnimales, sendFiletoBack } from "../../store/auth/thunks"
 import { GestorLayout } from "../layout/GestorLayout"
 
@@ -68,9 +68,10 @@ export const AnimalesPage = () => {
       return animalesAux
     }
     animales = filtrarAnimales();
-
+    const id =useSelector(selectIdSesion);
     const  [file, setFile]  = useState(null)
-    useEffect(() => {  if (file!=null )dispatch(sendFiletoBack(user.email, user.token, file))}, file)
+    useEffect(() => {  if (file!=null )dispatch(sendFiletoBack(id,user.email, user.token, file))}, file)
+
 
     const secondFuncion = (auxFileForBack) => {
       setFile(auxFileForBack)

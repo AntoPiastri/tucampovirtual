@@ -2,17 +2,17 @@ import { AccountCircle, LogoutOutlined } from "@mui/icons-material"
 import { AppBar, Grid, IconButton, Toolbar, Typography } from "@mui/material"
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { selectEstablecimiento, selectUser } from "../../store/auth";
+import { selectEstablecimiento, selectIdSesion, selectUser } from "../../store/auth";
 import { closeSession } from "../../store/auth/thunks";
 
 
 export const NavBar = () => {
-
+    const id =useSelector(selectIdSesion);
     const user = useSelector(selectUser);
     const establecimiento = useSelector(selectEstablecimiento)
     const dispatch = useDispatch();
     const onLogout = () => {
-        dispatch(closeSession())
+        dispatch(closeSession(id,user.email, user.token))
     }
     const navigate = useNavigate()
     const goToUserPage = () => {

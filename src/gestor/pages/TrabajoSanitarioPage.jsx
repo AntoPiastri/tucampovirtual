@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { useForm } from "../../hooks";
-import { selectErrorMessage, selectSuccessMessage, selectUser } from "../../store/auth";
+import { selectErrorMessage, selectIdSesion, selectSuccessMessage, selectUser } from "../../store/auth";
 import { cleanMessagge, sendFileTrabajoSanitariosGarrapatas } from "../../store/auth/thunks";
 import { GestorLayout } from "../layout/GestorLayout"
 
@@ -40,10 +40,11 @@ export const TrabajoSanitarioPage = () => {
         setFileTrabajoSanitarioGarrapatas(target.files[0])
 
     };
+    const id =useSelector(selectIdSesion);
     const onSubmit = (event) => {
         event.preventDefault();
         console.log(fileTrabajoSanitariosGarrapatas)
-        dispatch(sendFileTrabajoSanitariosGarrapatas(user.email, user.token, principioActivo, nombreLote, fecha, crearAlerta, fileTrabajoSanitariosGarrapatas))
+        dispatch(sendFileTrabajoSanitariosGarrapatas(id, user.email, user.token, principioActivo, nombreLote, fecha, crearAlerta, fileTrabajoSanitariosGarrapatas))
 
     }
 
