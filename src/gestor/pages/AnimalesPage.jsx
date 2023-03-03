@@ -37,7 +37,7 @@ export const AnimalesPage = () => {
     let [animales, cargarAnimales] = useState([])
 
     useEffect(() => { const funcionTest = async () => { cargarAnimales(await obtenerAnimales(user.email, user.token, dicoseFisco)) }; funcionTest() }, [])
-
+ 
 
     const filtroDisponibleVenta = (estado) =>{
       if (estado==true)
