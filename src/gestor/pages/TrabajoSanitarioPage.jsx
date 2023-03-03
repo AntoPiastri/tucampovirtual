@@ -1,7 +1,9 @@
+import {Link as RouterLink} from "react-router-dom"
 import { FileUploadOutlined } from "@mui/icons-material";
 import { Alert, Button, FormControlLabel, Grid, IconButton, Switch, TextField, Typography } from "@mui/material"
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { useForm } from "../../hooks";
 import { selectErrorMessage, selectSuccessMessage, selectUser } from "../../store/auth";
 import { cleanMessagge, sendFileTrabajoSanitariosGarrapatas } from "../../store/auth/thunks";
@@ -16,6 +18,14 @@ export const TrabajoSanitarioPage = () => {
     useEffect(() => { if (errorMessage || successMessage) { setTimeout(function () { dispatch(cleanMessagge()); }, 5000); } }, [errorMessage, successMessage])
 
 
+    //Funcion aux para manejo de fehca
+    const FechaYHora = (unidad) => {
+        const hoy = new Date();
+        const fecha = hoy.getDate() + '-' + (hoy.getMonth() + 1) + '-' + hoy.getFullYear();
+        const hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds();
+        if (unidad == "fecha") return fecha;
+        else if (unidad == "hora") return hora;
+    }
     const { nombreLote, onInputChange } = useForm({
         nombreLote: ""
     })
@@ -62,19 +72,14 @@ export const TrabajoSanitarioPage = () => {
                         xs={3}
                         sx={{ width: { sm: 450 }, backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: 3, borderRadius: 2 }}>
                         <Typography variant="h5">Registra tus tratamientos garrapaticidas</Typography>
-
                         <form onSubmit={onSubmit}>
                             <Grid container>
                                 <Grid item xs={12} sx={{ '& .MuiTextField-root': { mt: 2, width: '44.5ch' }, }}>
                                     <TextField
                                         select
                                         label="Principio activo"
-                                        SelectProps={{
-                                            native: true,
-                                        }}
-
-                                        onChange={handlePrincipioActivo}
-                                    >
+                                        SelectProps={{ native: true, }}
+                                        onChange={handlePrincipioActivo} >
                                         <option key={1} value={"Alfacipermetrina3"}>
                                             {"Alfacipermetrina 3%"}
                                         </option>
@@ -114,7 +119,6 @@ export const TrabajoSanitarioPage = () => {
                                         <option key={13} value={"Moxidectin1"}>
                                             {"Moxidectin 1%"}
                                         </option>
-
                                     </TextField>
                                 </Grid>
                             </Grid>
@@ -127,9 +131,7 @@ export const TrabajoSanitarioPage = () => {
                                         fullWidth
                                         name="nombreLote"
                                         value={nombreLote}
-                                        onChange={onInputChange}
-                                    />
-
+                                        onChange={onInputChange} />
                                 </Grid>
                             </Grid>
                             <Grid container>
@@ -138,7 +140,7 @@ export const TrabajoSanitarioPage = () => {
                                         id="date"
                                         label="Fecha de realización"
                                         type="date"
-                                        defaultValue="2017-05-24"
+                                        defaultValue={FechaYHora("fecha")}
                                         InputLabelProps={{
                                             shrink: true,
                                         }}
@@ -150,7 +152,6 @@ export const TrabajoSanitarioPage = () => {
                                 <Grid item>
                                     ¿Crear alerta?
                                     <Switch {...label} defaultChecked onChange={handleCrearAlerta} />
-
                                 </Grid>
                             </Grid>
                             <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" sx={{ padding: 10 }}>
@@ -162,7 +163,6 @@ export const TrabajoSanitarioPage = () => {
                                     </IconButton>
                                 </Grid>
                             </Grid>
-
                             <Grid container>
                                 <Grid item xs={12} sx={{ mt: 2 }} display={!!successMessage ? "" : "none"}>
                                     <Alert severity="success">{successMessage}</Alert>
@@ -173,17 +173,19 @@ export const TrabajoSanitarioPage = () => {
                                     <Alert severity="error">{errorMessage}</Alert>
                                 </Grid>
                             </Grid>
-
                             <Grid container spacing={2} sx={{ mb: 2, mt: 1 }}>
                                 <Grid item xs={12} sm={12}>
                                     <Button type="submit" variant="contained" fullWidth>
                                         Guardar
                                     </Button>
                                 </Grid>
-
                             </Grid>
-
                         </form>
+                        <Grid container direction="row" justifyContent="end">
+                            <Link component = {RouterLink} color="primary" to = "/trabajos/sanitario/alertas">
+                                Gestionar mis alertas
+                            </Link>
+                        </Grid>
                     </Grid>
                 </Grid>
             </GestorLayout>

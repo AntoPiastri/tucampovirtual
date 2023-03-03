@@ -1,5 +1,5 @@
 import { generalApiV1, generalSystemApi } from "../../apis";
-import { errorMessage, establecimiento, establecimientos, idSesion, loadComponent, login, logout, selectUser, successMessage, tEcografias, tPesadas, tSanitarios } from "./authSlide"
+import { alertas, errorMessage, establecimiento, establecimientos, idSesion, loadComponent, login, logout, selectUser, successMessage, tEcografias, tPesadas, tSanitarios } from "./authSlide"
 
 
 /*
@@ -76,12 +76,16 @@ export const saveToBigQuery = (tableName, data) => {
 }
 
 
-export const registroUsuario = (name, email, password) => {
+export const registroUsuario = (idSesion,name, email, password) => {
     return async (dispatch) => {
         try {
+            console.log(name)
+            console.log(email)
+            console.log("hola"+password)
             const resp = await generalSystemApi.post("https://backend-software-ganadero.azurewebsites.net/api/v1/system/signUp", { name, email, password });
+            console.log(resp)
             if (resp.status == 201) {
-                dispatch(checkingAuth(email, password))
+                dispatch(checkingAuth(idSesion,email, password))
                 dispatch(saveToBigQuery(tabla, { "Servicio": "Registro de usuario", "URL": generalSystemApi.getUri(), "Endpoint": "signUp", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             }
 
@@ -237,6 +241,10 @@ export const updateUser = (email, token, name, password, type) => {
                 if (error.response.status == "500") {
                     errorMessageText = "Error interno en el servidor"
                 }
+                else if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+                    errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
+                    dispatch(closeSession())
+                }
                 else {
                     errorMessageText = error.response.data.message
                 }
@@ -257,6 +265,10 @@ export const updateUser = (email, token, name, password, type) => {
                 }
                 else if (error.response.status == "400" && error.response.data.message == "New password could not be same as old password") {
                     errorMessageText = "La nueva contraseña no puede ser igual a la contraseña anterior"
+                }
+                else if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+                    errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
+                    dispatch(closeSession())
                 }
                 else {
                     errorMessageText = error.response.data.message
@@ -283,6 +295,10 @@ export const deleteUser = (email, token,) => {
             dispatch(logout());
         }
         catch (error) {
+            if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+                errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
+                dispatch(closeSession())
+            }
             //SERVICIO PENDIENTE DE MANEJO DE ERROR
             dispatch(saveToBigQuery(tabla, { "Servicio": "Eliminar usuario", "URL": generalApiV1.getUri(), "Endpoint": "user/delete", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
             dispatch(errorMessage(error.response.data.message))
@@ -317,6 +333,10 @@ export const getEstablecimientos = (email, token) => {
             if (error.response.status == "404" && error.response.data.message == "No Establishments found of the User") {
                 errorMessageText = "Aún no tienes establecimientos registrados."
             }
+            else if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+                errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
+                dispatch(closeSession())
+            }
             else if (error.response.status == "500") {
                 errorMessageText = "Error interno en el servidor"
             }
@@ -329,6 +349,7 @@ export const getEstablecimientos = (email, token) => {
 }
 export const agregarEstablecimiento = (email, token, nombreEstablecimiento, nombreProductor, dicoseFisico, rubroPrincipal, cantidadDicosePropiedad, valoresDicosePropiedad) => {
     return async (dispatch) => {
+        console.log("accedio a fun")
         token = "Bearer " + token;
         const headers = {
             "Content-Type": "application/json",
@@ -347,6 +368,10 @@ export const agregarEstablecimiento = (email, token, nombreEstablecimiento, nomb
             if (error.response.status == "400" && error.response.data.message == "Establishment already registered") {
                 errorMessageText = "El establecimiento ya se encuentra registrado"
             }
+            else if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+                errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
+                dispatch(closeSession())
+            }
             else if (error.response.status == "500") {
                 errorMessageText = "Error interno en el servidor"
             }
@@ -359,6 +384,7 @@ export const agregarEstablecimiento = (email, token, nombreEstablecimiento, nomb
     }
 
 }
+
 export const obtenerAnimales = async (email, token, dicoseFisico) => {
 
     token = "Bearer " + token;
@@ -366,12 +392,22 @@ export const obtenerAnimales = async (email, token, dicoseFisico) => {
         "Content-Type": "application/json",
         "Authorization": token
     }
-    const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/animal/get/all/byEstablishment", { email, dicoseFisico }, { headers })
-    //dispatch(animales(resp.data.data.animals))
-    //dispatch(saveToBigQuery(tabla,{"Servicio":"Obtener animales","URL":generalApiV1.getUri(),"Endpoint":"animal/get/all/byEstablishment","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
-    return resp.data.data.animals;
+    try{
+        const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/animal/get/all/byEstablishment", { email, dicoseFisico }, { headers })
+         //dispatch(saveToBigQuery(tabla,{"Servicio":"Obtener animales","URL":generalApiV1.getUri(),"Endpoint":"animal/get/all/byEstablishment","Status":resp.status,"Response":"Success", "Mensaje":resp.data.message}))
+        return resp.data.data.animals;
+    }
+    catch(error){
+        if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route")
+        {
+            //dispatch(saveToBigQuery(tabla,{"Servicio":"Obtener animales","URL":generalApiV1.getUri(),"Endpoint":"animal/get/all/byEstablishment","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
+        }
+    }
+    
+   
+    
 
-    //dispatch(saveToBigQuery(tabla,{"Servicio":"Obtener animales","URL":generalApiV1.getUri(),"Endpoint":"animal/get/all/byEstablishment","Status":error.response.status,"Response":"Failed", "Mensaje":error.response.data.message}))
+   
 
 }
 
@@ -476,18 +512,32 @@ const sanitize = (file) => {
 }
 //Llamados para carga de animales y trabajos
 export const sendFiletoBack = (email, token, PlanillaAnimales) => {
+
     return async (dispatch) => {
-        console.log(sanitize(PlanillaAnimales))
+       
+        //const valoresPlanillaAnimales=sanitize(PlanillaAnimales)
+        const valoresPlanillaAnimales = [
+                {"cruza": "  ","dicosePropietario": "110916728","dicoseTenedor": "110916728","dicoseUbicacion": "90","dispositivo": "45678910","edadDias": "N/A","edadMeses": "48","errores": "No","raza": "AA","sexo": "Hembra","status": "Muerto","trazabilidad": "Trazado"},
+                {"cruza": "  ","dicosePropietario": "110916728","dicoseTenedor": "110916728","dicoseUbicacion": "90","dispositivo": "45678912","edadDias": "N/A","edadMeses": "48","errores": "No","raza": "AA","sexo": "Hembra","status": "Muerto","trazabilidad": "Trazado"},
+                {"cruza": "  ","dicosePropietario": "110916728","dicoseTenedor": "110916728","dicoseUbicacion": "90","dispositivo": "45678913","edadDias": "N/A","edadMeses": "48","errores": "No","raza": "AA","sexo": "Hembra","status": "Muerto","trazabilidad": "Trazado"},
+                {"cruza": "  ","dicosePropietario": "110916728","dicoseTenedor": "110916728","dicoseUbicacion": "90","dispositivo": "45678914","edadDias": "N/A","edadMeses": "48","errores": "No","raza": "AA","sexo": "Hembra","status": "Muerto","trazabilidad": "Trazado"},
+                {"cruza": "  ","dicosePropietario": "110916728","dicoseTenedor": "110916728","dicoseUbicacion": "90","dispositivo": "45678915","edadDias": "N/A","edadMeses": "48","errores": "No","raza": "AA","sexo": "Hembra","status": "Muerto","trazabilidad": "Trazado"},
+                {"cruza": "  ","dicosePropietario": "110916728","dicoseTenedor": "110916728","dicoseUbicacion": "90","dispositivo": "45678916","edadDias": "N/A","edadMeses": "48","errores": "No","raza": "AA","sexo": "Hembra","status": "Muerto","trazabilidad": "Trazado"},
+                {"cruza": "  ","dicosePropietario": "110916728","dicoseTenedor": "110916728","dicoseUbicacion": "90","dispositivo": "45678917","edadDias": "N/A","edadMeses": "48","errores": "No","raza": "AA","sexo": "Hembra","status": "Muerto","trazabilidad": "Trazado"},
+                {"cruza": "  ","dicosePropietario": "110916728","dicoseTenedor": "110916728","dicoseUbicacion": "90","dispositivo": "45678918","edadDias": "N/A","edadMeses": "48","errores": "No","raza": "AA","sexo": "Hembra","status": "Muerto","trazabilidad": "Trazado"}
+            ]
+        console.log(valoresPlanillaAnimales)
         token = "Bearer " + token;
         const headers = {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
             "Authorization": token
         }
 
         try {
-            const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/animalSheet", { email, PlanillaAnimales }, { headers })
+            const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/animalSheet", { email, valoresPlanillaAnimales }, { headers })
             dispatch(saveToBigQuery(tabla, { "Servicio": "Ingresar planilla de animales", "URL": generalApiV1.getUri(), "file/animalSheet": "requestPasswordChange", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
             dispatch(successMessage(resp.data.message))
+            console.log(resp)
             if (resp.status == 200) {
                 let mensaje = { "titulo": "Archivo cargado con éxito", "contenido": "Detalles", "activeButton": false }
                 const data = resp.data.data
@@ -516,7 +566,10 @@ export const sendFiletoBack = (email, token, PlanillaAnimales) => {
             }
         }
         catch (error) {
-            //PENDIENTE DE DEFINICION CON CAMBIO FINAL
+            if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+                errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
+                dispatch(closeSession())
+            }
             dispatch(errorMessage(error.response.data.message))
         }
         dispatch(loadComponent(Math.random()))
@@ -524,9 +577,6 @@ export const sendFiletoBack = (email, token, PlanillaAnimales) => {
 }
 export const sendFileTrabajoPesadatoBack = (email, token, PlanillaPesadas) => {
     return async (dispatch) => {
-        console.log(email)
-        console.log(token)
-        console.log(PlanillaPesadas)
         token = "Bearer " + token;
         const headers = {
             "Content-Type": "multipart/form-data",
@@ -536,9 +586,17 @@ export const sendFileTrabajoPesadatoBack = (email, token, PlanillaPesadas) => {
         try {
             const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/pesadaSheet", { email, PlanillaPesadas }, { headers })
             dispatch(saveToBigQuery(tabla, { "Servicio": "Ingresar trabajo de pesada", "URL": generalApiV1.getUri(), "file/pesadaSheet": "requestPasswordChange", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
-            dispatch(successMessage(resp.data.message))
+            let message = resp.data.message
+            message = message.replaceAll("File", "Archivo")
+            message = message.replaceAll("saved successfully", "guardado exitosamente.")
+            dispatch(successMessage(message))
         }
         catch (error) {
+            let errorMessageText = ""
+            if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+                errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
+                dispatch(closeSession())
+            }
             console.log(error.response.data.message)
             dispatch(errorMessage(error.response.data.message))
         }
@@ -552,18 +610,23 @@ export const sendFileTrabajoEcografiatoBack = (email, token, encargadoTrabajo, P
             "Content-Type": "multipart/form-data",
             "Authorization": token
         }
-
         try {
             const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/ecografiaSheet", { email, encargadoTrabajo, PlanillaEcografias }, { headers })
             dispatch(saveToBigQuery(tabla, { "Servicio": "Ingresar trabajo de ecografías", "URL": generalApiV1.getUri(), "file/ecografiaSheet": "requestPasswordChange", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
-            dispatch(successMessage(resp.data.message))
-            console.log(resp)
+            let message = resp.data.message
+            message = message.replaceAll("File", "Archivo")
+            message = message.replaceAll("saved successfully", "guardado exitosamente.")
+            dispatch(successMessage(message))
         }
         catch (error) {
+            let errorMessageText = ""
+            if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+                errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
+                dispatch(closeSession())
+            }
             console.log(error.response.data.message)
             dispatch(errorMessage(error.response.data.message))
         }
-
     }
 }
 export const sendFileTrabajoSanitariosGarrapatas = (email, token, principioActivo, nombreLote,fecha, crearAlerta, PlanillaControlGarrapatas) => {
@@ -578,13 +641,20 @@ export const sendFileTrabajoSanitariosGarrapatas = (email, token, principioActiv
         try {
             const resp = await generalApiV1.post("https://backend-software-ganadero.azurewebsites.net/api/v1/file/controlGarrapataSheet", { email, principioActivo, nombreLote, fechaRealizacionTrabajo, crearAlerta, PlanillaControlGarrapatas }, { headers })
             dispatch(saveToBigQuery(tabla, { "Servicio": "Ingresar trabajo de control de garrapatas", "URL": generalApiV1.getUri(), "file/controlGarrapataSheet": "requestPasswordChange", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
-            dispatch(successMessage(resp.data.message))
+            let message = resp.data.message
+            message = message.replaceAll("File", "Archivo")
+            message = message.replaceAll("saved successfully", "guardado exitosamente.")
+            dispatch(successMessage(message))
         }
         catch (error) {
+            let errorMessageText = ""
+            if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+                errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
+                dispatch(closeSession())
+            }
             console.log(error.response.data.message)
             dispatch(errorMessage(error.response.data.message))
         }
-
     }
 }
 //Llamado para obtener todos los trabajos realizados
@@ -595,6 +665,7 @@ export const getTrabajos = (trabajo, email, token) => {
             "Content-Type": "application/json",
             "Authorization": token
         }
+        console.log(email)
         try {
             const searchEmail = email;
             if(trabajo=="Pesadas")
@@ -636,6 +707,10 @@ export const getTrabajos = (trabajo, email, token) => {
             if (error.response.status == "404") {
                 errorMessageText = "Aún no hay "+trabajo.toLowerCase()+" en el sistema"
             }
+            else if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+                errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
+                dispatch(closeSession())
+            }
             else if (error.response.status == "500") {
                 errorMessageText = "Error interno en el servidor"
             }
@@ -646,6 +721,90 @@ export const getTrabajos = (trabajo, email, token) => {
         }
     }
 }
+
+//Llamado para obtener todas las alertas del usuario
+export const getAlertas = ( email, token) => {
+    return async (dispatch) => {
+        token = "Bearer " + token;
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        try {
+            const searchEmail = email;
+            
+                const resp = await generalApiV1.post("alertaControlGarrapata/get/all/byUser", { email, searchEmail }, { headers })
+                dispatch(saveToBigQuery(tabla, { "Servicio": "Obtener alertas del usuario", "URL": generalApiV1.getUri(), "Endpoint": "alertaControlGarrapata/get/all/byUser", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+                console.log(resp)
+                console.log(resp.data.data.controlGarrapatas)
+                dispatch(alertas(resp.data.data.controlGarrapatas))
+            
+        }
+        catch (error) {
+        
+            dispatch(saveToBigQuery(tabla, { "Servicio": "Obtener alertas del usuario", "URL": generalApiV1.getUri(), "Endpoint": "alertaControlGarrapata/get/all/byUser", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+       
+            let errorMessageText = "";
+            if (error.response.status == "404") {
+                errorMessageText = "Aún no hay "+trabajo.toLowerCase()+" en el sistema"
+            }
+            else if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+                errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
+                dispatch(closeSession())
+            }
+            else if (error.response.status == "500") {
+                errorMessageText = "Error interno en el servidor"
+            }
+            else {
+                errorMessageText = error.response.data.message
+            }
+            dispatch(errorMessage(errorMessageText))
+        }
+    }
+}
+export const updateAlerta = ( email, token, nombreLote,principioActivo,fechaNotificacion,estadoAlerta) => {
+    return async (dispatch) => {
+        token = "Bearer " + token;
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        try {
+                nombreLote="Vaquillonas"
+                principioActivo="Ivermectina1-Fluazuron12.5"
+                fechaNotificacion="2023-07-09"
+                estadoAlerta="Activa"
+                console.log(email)
+                const resp = await generalApiV1.post("alertaControlGarrapata/update", { email, nombreLote,principioActivo,fechaNotificacion,estadoAlerta }, { headers })
+                dispatch(saveToBigQuery(tabla, { "Servicio": "Actualizar estado de alerta", "URL": generalApiV1.getUri(), "Endpoint": "alertaControlGarrapata/update", "Status": resp.status, "Response": "Success", "Mensaje": resp.data.message }))
+                console.log(resp)
+                //console.log(resp.data.data.controlGarrapatas)
+                //dispatch(alertas(resp.data.data.controlGarrapatas))
+            
+        }
+        catch (error) {
+            console.log(error.response.data.message)
+            dispatch(saveToBigQuery(tabla, { "Servicio": "Actualizar estado de alerta", "URL": generalApiV1.getUri(), "Endpoint": "alertaControlGarrapata/update", "Status": error.response.status, "Response": "Failed", "Mensaje": error.response.data.message }))
+       
+            let errorMessageText = "";
+            if (error.response.status == "404") {
+                errorMessageText = "Aún no hay "+trabajo.toLowerCase()+" en el sistema"
+            }
+            else if (error.response.status == "401"&& error.response.data.message =="You do not have permission to access on this route") {
+                errorMessageText = "Tu sesión ha expirado, por favor vuelve a iniciarla"
+                dispatch(closeSession())
+            }
+            else if (error.response.status == "500") {
+                errorMessageText = "Error interno en el servidor"
+            }
+            else {
+                errorMessageText = error.response.data.message
+            }
+            dispatch(errorMessage(errorMessageText))
+        }
+    }
+}
+
 
 
 

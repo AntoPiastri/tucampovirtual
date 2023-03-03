@@ -14,7 +14,7 @@ export const TrabajosPages = () => {
   {
     const errorMessage = useSelector(selectErrorMessage)
     const successMessage = useSelector(selectSuccessMessage)
-    useEffect(() => { if (errorMessage || successMessage) { setAvise(successMessage) } }, [successMessage])
+    //useEffect(() => { if (errorMessage || successMessage) { setAvise(successMessage) } }, [successMessage])
     const user = useSelector(selectUser);
     const dispatch = useDispatch();
 
@@ -39,7 +39,7 @@ export const TrabajosPages = () => {
     }
     const setDescription = (type, trabajo) => {
       if (type == "Pesadas") {
-        return "El peso del animal fue de  " + trabajo.pesoAnimal;
+        return "El peso del animal fue de  " + trabajo.pesoAnimal+" kilos";
       }
       else if (type == "Ecografias") {
         return "El encargado  " + trabajo.encargadoTrabajo + " con resultado " + trabajo.estadoAnimal;
@@ -83,9 +83,9 @@ export const TrabajosPages = () => {
 
     const columns = [
       { field: 'id', headerName: 'Caravana', width: 100 },
-      { field: 'fecha', headerName: 'Fecha', width: 100 },
+      { field: 'fecha', headerName: 'Fecha', width: 115 },
       { field: 'esUltimoTrabajoCaravana', headerName: '¿Último trabajo del animal?', width: 260 },
-      { field: 'descripcion', headerName: 'Descripción', width: 490 }
+      { field: 'descripcion', headerName: 'Descripción', width: 500 }
     ];
 
     const showTrabajo = (trabajo) => {

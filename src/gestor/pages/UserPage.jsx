@@ -57,7 +57,7 @@ export const UserPage = () => {
         <Grid>
             <GestorLayout>
             </GestorLayout>
-            <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" sx={{ minHeight: "100vh", backgroundImage: `url(http://demos.alan.sh/files/images/nk4RN.png")`, backgroundSize: "cover", backgroundPosition: "10% 52%", padding: 4 }}>
+            <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" sx={{ minHeight: "100vh", backgroundImage: `url(http://demos.alan.sh/files/images/ujkoW.jpg)`, backgroundSize: "cover", backgroundPosition: "10% 52%", padding: 4 }}>
                 <Grid container spacing={2} direction="column" alignItems="center" justifyContent="center">
                     <Grid container spacing={4} direction="row" alignItems="center" justifyContent="center">
                         <Grid item>

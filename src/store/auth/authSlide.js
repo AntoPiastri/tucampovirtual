@@ -17,6 +17,9 @@ export const authSlice = createSlice({
             state.establecimientos=null
             state.establecimiento = null
             state.animales= null
+            state.tPesadas= null
+            state.tEcografias= null
+            state.tSanitarios= null
             state.successMessage= null
             state.errorMessage=null
             state.loadComponent= null
@@ -39,6 +42,9 @@ export const authSlice = createSlice({
         tSanitarios : (state ,action) =>{
             state.tSanitarios= action.payload
         },
+        alertas : (state ,action) =>{
+            state.alertas= action.payload
+        },
         successMessage : (state ,action) =>{
             state.successMessage= action.payload
         }, 
@@ -51,7 +57,7 @@ export const authSlice = createSlice({
     }
 });
 
-export const {idSesion, login, logout, establecimientos, establecimiento,tPesadas,tEcografias,tSanitarios, successMessage, errorMessage, loadComponent} = authSlice.actions;
+export const {idSesion, login, logout, establecimientos, establecimiento,tPesadas,tEcografias,tSanitarios,alertas,  successMessage, errorMessage, loadComponent} = authSlice.actions;
 //export const {login, logout, checkingCredentials, establecimientos, errorMessage, animales, successMessage, establecimiento, loadComponent} = authSlice.actions;
 export const selectIdSesion = (state) => state.auth.idSesion;
 export const selectUser = (state) => state.auth.user;
@@ -60,6 +66,7 @@ export const selectEstablecimiento = (state) => state.auth.establecimiento
 export const selectPesadas = (state) => state.auth.tPesadas
 export const selectEcografias = (state) => state.auth.tEcografias
 export const selectSanitarios = (state) => state.auth.tSanitarios
+export const selectAlertas = (state) => state.auth.alertas
 export const selectErrorMessage = (state) => state.auth.errorMessage
 export const selectSuccessMessage = (state) => state.auth.successMessage
 export const selectLoadComponent = (state) => state.auth.loadComponent

@@ -2,6 +2,7 @@ import { useSelector } from "react-redux"
 import { Navigate, Route, Routes } from "react-router-dom"
 import { selectUser } from "../../store/auth"
 import { AgregarEstablecimientoPage } from "../pages/AgregarEstablecimientoPage"
+import { AlertasPages } from "../pages/AlertasPages"
 import { AnimalesPage } from "../pages/AnimalesPage"
 import { EstablecimientosPage } from "../pages/EstablecimientosPage"
 import { GestorPage } from "../pages/GestorPage"
@@ -28,6 +29,7 @@ export const GestorRoutes = () => {
             <Route path="/trabajos/peso" element= {<TrabajoPesoPage/>}/>
             <Route path="/trabajos/reproductivo" element= {<TrabajoReproductivoPage/>}/>
             <Route path="/trabajos/sanitario" element= {<TrabajoSanitarioPage/>}/>
+            <Route path="/trabajos/sanitario/alertas" element= {<AlertasPages/>}/>
 
             <Route path="/*" element= {<Navigate to={"/"}/>}/>
         </Routes>

@@ -87,7 +87,7 @@ export const AnimalesPage = () => {
     const onFileInputChange =  ({ target }) => {
       if (target.files === 0) return;
       getFile(target.files[0])
-      //handleClickOpen()
+      handleClickOpen()
     };
 
     const columns = [
@@ -124,8 +124,6 @@ export const AnimalesPage = () => {
     }
 
 
-
-    const loadComponent = useSelector(selectLoadComponent)
 
     return (
       <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" sx={{ minHeight: "100vh", backgroundImage: `url("http://demos.alan.sh/files/images/ujkoW.jpg")`, backgroundSize: "cover", backgroundPosition: "10% 52%", padding: 4 }}>
